@@ -1,0 +1,60 @@
+.c-green {
+    color: #4caf50;
+}
+.bg-green {
+    background-color: #e8f5e9;
+}
+
+.c-red {
+    color: #fb5962;
+    /* color: #f44336; */
+}
+.bg-red {
+    background-color: #ffebee;
+}
+
+.c-blue {
+    color: #608cee;
+    /* #2196f3 */
+}
+.bg-blue {
+    background-color: #e3f2fd;
+}
+
+.c-purple {
+    color: #9c27b0;
+}
+.bg-purple {
+    background-color: #f3e5f5;
+}
+
+.c-oren {
+    color: #fbb359;
+}
+.bg-oren {
+    background-color: #fbb35966;
+}
+
+.widget-left {
+    width: 100%;
+}
+
+.widget-titles h6 {
+    color: rgba(0,0,0,.3);
+    font-weight: bold;
+}
+
+.widget-icons {
+    margin: 0 1rem 0 0;
+    position: relative;
+    border-radius: 50%;
+    padding: .85rem;
+}
+
+.widget-numbers {
+    color: #32325d;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 15px;
+    display: inline-block;
+}

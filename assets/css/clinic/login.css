@@ -1,0 +1,51 @@
+html {
+    min-height:100%;/* make sure it is at least as tall as the viewport */
+    position:relative;
+}
+
+/* body {
+    background: #74ebd5;
+    background: -webkit-linear-gradient(to left, #ACB6E5, #74ebd5);
+    background: linear-gradient(to left, #ACB6E5, #74ebd5);
+    height: 100%;
+} */
+
+.login-wrap {
+    background: #fff;
+    border-radius: 5px;
+    width: 400px;
+    margin: 8% 0;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    padding: 0 0 1rem;
+}
+
+.login-head {
+    color: #fff;
+    text-align: center;
+    background: #8655FC;
+    background: linear-gradient(to right, #8914fe 0%, #8063f5 100%);
+    padding: 50px;
+    border-radius: 5px 5px 0 0;
+}
+
+.login-head p {
+    color: #fff;
+}
+
+.login-body {
+    padding: 1.2rem;
+}
+
+.login-footer {
+    text-align: center;
+}
+
+.button {
+    transition: .25s all;
+}
+.button:hover {
+    /* border-radius: 8px; */
+    background: linear-gradient(to right, #8914fe 0%, #8063f5 100%);
+    /* box-shadow: 0 14px 25px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22); */
+}
