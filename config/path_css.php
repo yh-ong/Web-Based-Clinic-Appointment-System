@@ -24,3 +24,6 @@ $cssItem = array(
 foreach ($cssItem as $cssPath) {
     echo '<link rel="stylesheet" href="' . ('../assets/css/' . $cssPath) . '">' . PHP_EOL;
 }
+
+echo '<script src="../assets/js/sweetalert2.all.min.js"></script>'.PHP_EOL;
+echo '<script src="../assets/js/jquery-3.4.1.min.js"></script>'.PHP_EOL;

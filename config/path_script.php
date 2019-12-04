@@ -1,7 +1,7 @@
 <?php
 
 $jsItem = array(
-    'jquery-3.4.1.min.js',
+    // 'jquery-3.4.1.min.js',
     'bootstrap.bundle.min.js',
     'moment.min.js',
     'bootstrap-datetimepicker.min.js',
@@ -11,7 +11,6 @@ $jsItem = array(
     'metismenu.js',
     'owl.carousel.min.js',
     'popper.min.js',
-    'sweetalert2.all.min.js',
     'scripts.js'
 );
 
