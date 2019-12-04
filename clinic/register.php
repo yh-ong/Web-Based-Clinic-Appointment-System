@@ -1,6 +1,31 @@
 <?php
 require_once('../config/autoload.php');
 require_once('./includes/path.inc.php');
+
+$errors = array();
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $name     = escape_input($_POST['inputClinicName']);
+    $manager  = escape_input($_POST['inputManagerName']);
+    $email    = escape_input($_POST['inputEmail']);
+    $contact  = escape_input($_POST['inputContact']);
+    $password = md5($conn->real_escape_string($_POST['inputPassword']));
+
+    if (empty($name)) {
+        array_push($errors, "Clinic Name is required");
+    }
+    if (empty($manager)) {
+        array_push($errors, "Clinic Manager Name is required");
+    }
+    if (empty($email)) {
+        array_push($errors, "Email is required");
+    } else {
+        email_validation($email);
+    }
+    if (empty($contact)) {
+        array_push($errors, "Contact is required");
+    }
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -19,6 +44,7 @@ require_once('./includes/path.inc.php');
             </div>
             <div class="login-body">
                 <form name="login_form" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                    <?php echo display_error(); ?>
                     <div class="form-group">
                         <label for="exampleInputEmail1">Clinic Name</label>
                         <input type="text" name="inputClinicName" class="form-control" id="inputClinicName" placeholder="Clinic Name">
@@ -29,7 +55,7 @@ require_once('./includes/path.inc.php');
                     </div>
                     <div class="form-group">
                         <label for="exampleInputEmail1">Email Address</label>
-                        <input type="email" name="inputEmail" class="form-control" id="inputEmail" placeholder="example@address.com">
+                        <input type="text" name="inputEmail" class="form-control" id="inputEmail" placeholder="example@address.com">
                     </div>
                     <div class="form-group">
                         <label for="exampleInputContact">Contact Number</label>
@@ -53,33 +79,31 @@ require_once('./includes/path.inc.php');
 </html>
 <?php
 if (isset($_POST['registerbtn'])) {
-    $name     = $conn->real_escape_string($_POST['inputClinicName']);
-    $manager  = $conn->real_escape_string($_POST['inputManagerName']);
-    $email    = $conn->real_escape_string($_POST['inputEmail']);
-    $contact  = $conn->real_escape_string($_POST['inputContact']);
-    $password = md5($conn->real_escape_string($_POST['inputPassword']));
-
     if (!$conn) {
         die("Connection failed: " . mysqli_connect_error());
     }
 
-    $query2 = "INSERT INTO clinics (clinic_name, date_created ) VALUES ('" . $name . "','" . $date_created . "')";
-    if (mysqli_query($conn, $query2)) {
-        $last_id = mysqli_insert_id($conn);
-    } else {
-        echo "Error: " . $sql . "<br>" . mysqli_error($conn);
-    }
+    if (count($errors) == 0) {
+        $stmt = $conn->prepare("INSERT INTO clinics (clinic_name, date_created) VALUES (?, ?)");
+        $stmt->bind_param("ss", $name, $date_created);
+        if ($stmt->execute()) {
+            $last_id = mysqli_insert_id($conn);
+        } else {
+            echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+        }
+        $stmt->close();
 
-    $query1 = "INSERT INTO clinic_manager (clinicadmin_name, clinicadmin_email, clinicadmin_password, clinicadmin_contact, date_created, clinic_id) VALUES ('" . $manager . "','" . $email . "','" . $password . "','" . $contact . "','" . $date_created . "','" . $last_id . "')";
-    if (mysqli_query($conn, $query1)) {
-        echo '<script>alert("Clinic Have Been Created");</script>';
-        $_SESSION['sess_email'] = $email;
-        $_SESSION['loggedin'] = 1;
-        header("Location: clinic-register.php");
-    } else {
-        echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+        $stmt = $conn->prepare("INSERT INTO clinic_manager (clinicadmin_name, clinicadmin_email, clinicadmin_password, clinicadmin_contact, date_created, clinic_id) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssssi", $manager, $email, $password, $contact, $date_created, $last_id);
+        if ($stmt->execute()) {
+            echo '<script>alert("Clinic Have Been Created");</script>';
+            $_SESSION['sess_email'] = $email;
+            $_SESSION['loggedin'] = 1;
+            header("Location: clinic-register.php");
+        } else {
+            echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+        }
+        $stmt->close();
     }
-
-    mysqli_close($conn);
 }
 ?>

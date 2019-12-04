@@ -2,7 +2,30 @@
 require_once('../config/autoload.php');
 require_once('./includes/path.inc.php');
 require_once('./includes/session.inc.php');
-ob_start();
+
+$errors = array();
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $title = escape_input($_POST['inputTitle']);
+    $content = escape_input($_POST['inputContent']);
+
+    if (empty($title)) {
+        array_push($errors, "Title is required");
+    }if (empty($content)) {
+        array_push($errors, "Content is required");
+    }
+
+    if (count($errors) == 0) {
+        $stmt = $conn->prepare("INSERT INTO announcement (ann_title, ann_content, date_created, clinic_id) VALUES (?,?,?,?)");
+        $stmt->bind_param("sssi", $title, $content, $date_created, $clinic_row['clinic_id']);
+        if ($stmt->execute()) {
+            header('Location: announcement.php');
+        } else {
+            echo "Error: " . $query . "<br>" . mysqli_error($conn);
+        }
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,6 +44,7 @@ ob_start();
                 <div class="card">
                     <div class="card-body">
                         <form name="announce_frm" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                            <?php echo display_error(); ?>
                             <div class="form-group">
                                 <!-- <label for="inputTitle">Title</label> -->
                                 <input type="text" name="inputTitle" class="form-control form-control-sm" id="inputTitle" placeholder="Title">
@@ -92,18 +116,3 @@ ob_start();
 </body>
 
 </html>
-<?php
-if (isset($_POST["postbtn"])) {
-    $title = $conn->real_escape_string($_POST['inputTitle']);
-    $content = $conn->real_escape_string($_POST['inputContent']);
-
-    $query = "INSERT INTO announcement (ann_title, ann_content, date_created, clinic_id) VALUES ('" . $title . "', '" . $content . "','" . $date_created . "', '" . $clinic_row['clinic_id'] . "')";
-    if (mysqli_query($conn, $query)) {
-        header('Location: announcement.php');
-    } else {
-        echo "Error: " . $query . "<br>" . mysqli_error($conn);
-    }
-    ob_end_clean();
-    mysqli_close($conn);
-}
-?>

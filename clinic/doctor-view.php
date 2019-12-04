@@ -3,7 +3,7 @@ require_once('../config/autoload.php');
 require_once('./includes/path.inc.php');
 require_once('./includes/session.inc.php');
 
-$doctor_id = $_GET["did"];
+$doctor_id = decrypt_url($_GET['did']);
 $result = mysqli_query($conn,"SELECT * FROM doctors WHERE doctor_id = '".$doctor_id."' ");
 $doctor_row = mysqli_fetch_assoc($result);
 ?>

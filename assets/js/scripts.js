@@ -117,8 +117,8 @@
     /*================================
     datatable active
     ==================================*/
-    $(document).ready(function () {
-        $('#datatable').DataTable();
+    $('#datatable').DataTable({
+        responsive: true
     });
 
     /*================================

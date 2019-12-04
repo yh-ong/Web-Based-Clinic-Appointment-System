@@ -18,7 +18,7 @@ include('../helper/select_helper.php');
         <!-- Page content -->
         <div class="row">
             <div class="col-12 mt-3 mb-3">
-                <a href="./clinic-edit.php" class="btn btn-primary btn-sm pull-right px-5">Edit Clinic Profile</a>
+                <a href="./profile-edit.php" class="btn btn-primary btn-sm pull-right px-5">Edit Clinic Profile</a>
             </div>
 
             <div class="col-12">

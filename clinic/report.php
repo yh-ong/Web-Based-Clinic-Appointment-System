@@ -2,7 +2,20 @@
 require_once('../config/autoload.php');
 require_once('./includes/path.inc.php');
 require_once('./includes/session.inc.php');
-ob_start();
+
+$errors = array();
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $datefrom = $conn->real_escape_string($_POST['inputDateFrom']);
+    $dateto = $conn->real_escape_string($_POST['inputDateTo']);
+
+    if (empty($datefrom)) {
+        array_push($errors, "Date From is required");
+    }
+    if (empty($dateto)) {
+        array_push($errors, "Date Until is required");
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,6 +34,7 @@ ob_start();
                 <div class="card">
                     <div class="card-body">
                         <form name="report_frm" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                            <?php echo display_error(); ?>
                             <div class="form-group row">
                                 <label for="inputDateFrom" class="col-sm-3 col-form-label text-right">From Date</label>
                                 <div class="col-sm-6">
@@ -42,65 +56,63 @@ ob_start();
                 </div>
             </div>
         </div>
-        
+        <!-- End Page Content -->
         <?php
-            if (isset($_POST["generatebtn"])) {
-            $datefrom = $conn->real_escape_string($_POST['inputDateFrom']);
-            $dateto = $conn->real_escape_string($_POST['inputDateTo']);
+        if (isset($_POST["generatebtn"])) {
+            if (count($errors) == 0) {
+                // $stmt = $conn->prepare("SELECT * FROM appointment WHERE datefrom = ? AND dateto = ?");
+                $stmt = $conn->prepare("SELECT * FROM announcement WHERE ann_title = ? AND ann_content = ?");
+                $stmt->bind_param("ss", $datefrom, $dateto);
 
-            $query = "SELECT * FROM appointment WHERE datefrom = '".$datefrom."' AND dateto = '".$dateto."'";
-            if (mysqli_query($conn, $query)) {
-        ?><div class="result-page">
-            <div class="action-btn-group">
-                <button type="button" class="btn btn-primary btn-sm px-5" onClick="download();" name="downloadbtn"
-                    download><i class="fas fa-download"></i> Download as PDF</button>
-                <button type="button" class="btn btn-primary btn-sm px-5" onClick="print();" name="printbtn"><i
-                        class="fas fa-print"></i> Print</button>
-            </div>
-            <div class="card">
-                <div class="card-body" id="printContent">
-                    <table class="table" border="1">
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">First</th>
-                                <th scope="col">Last</th>
-                                <th scope="col">Handle</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th scope="row">1</th>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>@mdo</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">2</th>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                                <td>@fat</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">3</th>
-                                <td>Larry</td>
-                                <td>the Bird</td>
-                                <td>@twitter</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+                if ($stmt->execute()) {
+                    ?><div class="result-page">
+                        <div class="action-btn-group">
+                            <button type="button" class="btn btn-primary btn-sm px-5" onClick="download();" name="downloadbtn" download><i class="fas fa-download"></i> Download as PDF</button>
+                            <button type="button" class="btn btn-primary btn-sm px-5" onClick="print();" name="printbtn"><i class="fas fa-print"></i> Print</button>
+                        </div>
+                        <div class="card">
+                            <div class="card-body" id="printContent">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">First</th>
+                                            <th scope="col">Last</th>
+                                            <th scope="col">Handle</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row">1</th>
+                                            <td>Mark</td>
+                                            <td>Otto</td>
+                                            <td>@mdo</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">2</th>
+                                            <td>Jacob</td>
+                                            <td>Thornton</td>
+                                            <td>@fat</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">3</th>
+                                            <td>Larry</td>
+                                            <td>the Bird</td>
+                                            <td>@twitter</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
         <?php
                 } else {
-                    echo "Error: " . $query . "<br>" . mysqli_error($conn);
+                    echo "<script>Swal.fire({title: 'Error!', text: 'No Record Found', type: 'error', confirmButtonText: 'Try Again'})</script>";
                 }
-                ob_end_clean();
-                mysqli_close($conn);
+                $stmt->close();
             }
+        }
         ?>
-        <!-- End Page Content -->
     </div>
     <?php include JS_PATH; ?>
     <script>
@@ -115,7 +127,7 @@ ob_start();
         }
     </script>
     <script type="text/javascript">
-        $(function () {
+        $(function() {
             $('#datefrom').datetimepicker({
                 format: 'YYYY-MM-DD',
             });
@@ -124,10 +136,10 @@ ob_start();
                 useCurrent: false,
             });
 
-            $('#datefrom').on('dp.change', function (e) {
+            $('#datefrom').on('dp.change', function(e) {
                 $('#dateto').data('DateTimePicker').minDate(e.date);
             });
-            $('#dateto').on('dp.change', function (e) {
+            $('#dateto').on('dp.change', function(e) {
                 $('#datefrom').data('DateTimePicker').maxDate(e.date);
             });
         });

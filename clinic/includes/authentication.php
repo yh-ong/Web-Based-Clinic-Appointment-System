@@ -78,7 +78,7 @@ function e($val)
     return mysqli_real_escape_string($conn, trim($val));
 }
 
-function display_error()
+/* function display_error()
 {
     global $errors;
 
@@ -89,7 +89,7 @@ function display_error()
         }
         echo '</div>';
     }
-}
+} */
 
 function isLoggedIn()
 {

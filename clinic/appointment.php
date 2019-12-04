@@ -2,7 +2,8 @@
 require_once('../config/autoload.php');
 require_once('./includes/path.inc.php');
 require_once('./includes/session.inc.php');
-?><!DOCTYPE html>
+?>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -22,15 +23,15 @@ require_once('./includes/session.inc.php');
                         <?php
                         function headerTable()
                         {
-                            $header = array("Appointment ID #", "Patient", "App Date", "Time", "Treatment Type", "Confirmation", "Action");
+                            $header = array("App ID #", "Patient", "App Date", "Time", "Treatment Type", "Confirmation", "Action");
                             $arrlen = count($header);
                             for ($i = 0; $i < $arrlen; $i++) {
-                                echo "<th>" . $header[$i] . "</th>".PHP_EOL;
+                                echo "<th>" . $header[$i] . "</th>" . PHP_EOL;
                             }
                         }
                         ?>
-                        <div class="data-tables">
-                            <table id="datatable" class="table" style="width:100%">
+                        <div class="data-tables table-responsive">
+                            <table id="datatable" class="table nowrap" style="width:100%">
                                 <thead>
                                     <tr>
                                         <?php headerTable(); ?>
@@ -38,37 +39,32 @@ require_once('./includes/session.inc.php');
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $table_result = mysqli_query($conn, "SELECT * FROM doctors WHERE clinic_id = " . $clinic_row['clinic_id'] . "");
-                                    while ($table_row = mysqli_fetch_assoc($table_result)) {
+                                    $tlist = $conn->query(
+                                        "SELECT * FROM appointment 
+                                         JOIN patients ON appointment.patient_id = patients.patient_id 
+                                         JOIN clinics ON appointment.clinic_id = clinics.clinic_id 
+                                         JOIN doctors ON appointment.doctor_id = doctors.doctor_id 
+                                         WHERE appointment.clinic_id = " . $clinic_row['clinic_id'] . "
+                                        ");
+                                    while ($trow = $tlist->fetch_assoc()) :
                                         ?>
-                                    <tr>
-                                        <td><?= rand(); ?></td>
-                                        <td>Unity Butler</td>
-                                        <td>2009/12/09</td>
-                                        <td>9:00 AM</td>
-                                        <td>Follow Up Visit</td>
-                                        <td><span class="badge badge-pill badge-success mr-1">&#10004;</span>Confirmed</td>
-                                        <td><button type="button" name="checkbtn" class="btn btn-sm btn-primary"><i class="fas fa-plane-arrival mr-3"></i>Arrive</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td><?= rand(); ?></td>
-                                        <td>Howard Hatfield</td>
-                                        <td>2008/12/16</td>
-                                        <td>10:00 AM</td>
-                                        <td>New Patient</td>
-                                        <td><span class="badge badge-pill badge-warning mr-1">&#33;</span>Not Confirmed</td>
-                                        <td><button type="button" name="checkbtn" class="btn btn-sm btn-primary"><i class="fas fa-walking mr-3"></i>On Way</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td><?= rand(); ?></td>
-                                        <td>Hope Fuentes</td>
-                                        <td>2010/02/12</td>
-                                        <td>12:00 PM</td>
-                                        <td>Sick Visit</td>
-                                        <td><span class="badge badge-pill badge-success mr-1">&#10004;</span>Confirmed</td>
-                                        <td><button type="button" name="checkbtn" class="btn btn-sm btn-primary"><i class="fas fa-walking mr-3"></i>On Way</button></td>
-                                    </tr>
-                                    <?php } ?>
+                                        <tr>
+                                            <td><?= $trow['app_id'] ?></td>
+                                            <td><?= $trow['patient_lastname'] . ' ' . $trow['patient_firstname'] ?></td>
+                                            <td><?= $trow['app_date'] ?></td>
+                                            <td><?= $trow['app_time'] ?></td>
+                                            <td><?= $trow['treatment_type'] ?></td>
+                                            <td><?php
+                                                if ($trow['status'] == 1) {
+                                                    echo '<span class="badge badge-success px-3 py-1">Confirmed</span>';
+                                                } else {
+                                                    echo '<span class="badge badge-warning px-3 py-1">Pending</span>';
+                                                }
+                                                ?>
+                                            </td>
+                                            <td><button type="button" name="checkbtn" class="btn btn-sm btn-primary"><i class="fas fa-plane-arrival mr-3"></i>Arrive</button></td>
+                                        </tr>
+                                    <?php endwhile; ?>
                                 </tbody>
                                 <tfoot>
                                     <tr>
@@ -85,10 +81,10 @@ require_once('./includes/session.inc.php');
     </div>
     <?php include JS_PATH; ?>
     <script>
-        $( document ).ready(function() {
+        $(document).ready(function() {
             $('button[name="checkbtn"]').click(function() {
                 $(this).removeClass('btn-primary');
-                $(this).addClass('btn-successful'); 
+                $(this).addClass('btn-successful');
                 $(this).html('<i class="fas fa-plane-arrival mr-3"></i>Arrive');
             });
         });
