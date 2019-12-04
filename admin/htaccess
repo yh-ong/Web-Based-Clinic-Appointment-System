@@ -1,0 +1,24 @@
+<IfModule mod_rewrite.c>
+
+Options +FollowSymLinks
+
+RewriteEngine on
+
+# Send request via index.php
+
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}\.php !-f
+
+# RewriteRule ^(.*)$ index.php?url=$1 [L,QSA] (on other source)
+# RewriteRule ^(.*)$ index.php/$1 [L]
+
+# Hide File Extension
+# RewriteRule ^(.*)$ $1.php
+
+
+# Error Page ！important
+ErrorDocument 404 http://localhost/app/admin/layouts/404.php
+
+</IfModule>
