@@ -352,8 +352,9 @@ if (isset($_POST["savebtn"])) {
 					$path = "../uploads/" . $clinic_row['clinic_id'] . "/doctor" . "/" . $_FILES['inputAvatar']['name'];
 					$image = $_FILES['inputAvatar']['name'];
 
-					if (!file_exits($folderpath))
+					if (!file_exits($folderpath)) {
 						mkdir($folderpath, 0777, true);
+					}
 					move_uploaded_file($_FILES['inputAvatar']['tmp_name'], $path);
 				} else {
 					echo "<script>Swal.fire('Oops...','You should select a file to upload!','error')</script>";

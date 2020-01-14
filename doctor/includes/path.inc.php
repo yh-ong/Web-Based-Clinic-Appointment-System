@@ -2,7 +2,7 @@
 // Clinic
 $HOME_PAGE = "index.php";
 $BRAND_NAME = "Clinic ME";
-$PATH = "app/doctor";
+$PATH = "doclab/doctor";
 
 switch ($_SERVER["SCRIPT_NAME"]) {
     case '/'.$PATH.'/login.php':
@@ -92,11 +92,23 @@ switch ($_SERVER["SCRIPT_NAME"]) {
         $CURRENT_PATH = "Language";
         $PAGE_TITLE = "Language | $BRAND_NAME";
         break;
+
+    case '/'.$PATH.'/treatment.php':
+        $CURRENT_PAGE = "Treatment";
+        $CURRENT_PATH = "Treatment";
+        $PAGE_TITLE = "Treatment | $BRAND_NAME";
+        break;
     
     case '/'.$PATH.'/report.php':
         $CURRENT_PAGE = "Report";
         $CURRENT_PATH = "Report";
         $PAGE_TITLE = "Report | $BRAND_NAME";
+        break;
+    
+    case '/'.$PATH.'/review.php':
+        $CURRENT_PAGE = "Review";
+        $CURRENT_PATH = "Review";
+        $PAGE_TITLE = "Review | $BRAND_NAME";
         break;
     
     // Index Page

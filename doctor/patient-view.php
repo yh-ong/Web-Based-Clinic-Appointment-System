@@ -1,5 +1,5 @@
 <?php
-require_once('../config/autoload.php');
+include('../config/autoload.php');
 include('./includes/path.inc.php');
 include('./includes/session.inc.php');
 
@@ -7,13 +7,43 @@ $patient_id = $_GET["id"];
 $result = $conn->query("SELECT * FROM patients WHERE patient_id = $patient_id");
 $row = $result->fetch_assoc();
 
+$patient_age = date('Y') - date('Y', strtotime($row['patient_dob']));
+
 $medresult = $conn->query(
-	"SELECT * FROM medical_diagnosis M 
+	"SELECT * FROM medical_record M 
 	INNER JOIN clinics C ON M.clinic_id = C.clinic_id
 	INNER JOIN patients P ON M.patient_id = P.patient_id
 	WHERE M.patient_id = $patient_id"
 );
 $medrow = $medresult->fetch_assoc();
+
+$errors = array();
+
+if (isset($_POST['prescriptionbtn'])) {
+	$sympton = escape_input($_POST['sympton']);
+	$diagnosis = escape_input($_POST['diagnosis']);
+	$advice = escape_input($_POST['advice']);
+
+	if (empty($sympton)) {
+		array_push($errors, "Symptons is required");
+	}
+
+	if (empty($diagnosis)) {
+		array_push($errors, "Dianogsis is required");
+	}
+
+	if (empty($advice)) {
+		array_push($errors, "Advise is required");
+	}
+
+	if (count($errors) == 0) {
+		$stmt = $conn->prepare("INSERT INTO medical_record (med_sympton, med_diagnosis, med_advice, med_date, patient_id, clinic_id, doctor_id) VALUE (?,?,?,?,?,?,?) ");
+		$stmt->bind_param("sssssss", $sympton, $diagnosis, $advice, $date_created, $patient_id, $doctor_row['clinic_id'], $doctor_row['doctor_id']);
+		$stmt->execute();
+		$stmt->close();
+		header('Location: '.$_SERVER['REQUEST_URI']);
+	}
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -34,12 +64,12 @@ $medrow = $medresult->fetch_assoc();
 	}
 
 
-	tbody tr td:first-child {
+	/* tbody tr td:first-child {
 		width: 8em;
 		min-width: 10em;
 		max-width: 10em;
 		word-break: break-all;
-	}
+	} */
 </style>
 
 <body>
@@ -50,29 +80,82 @@ $medrow = $medresult->fetch_assoc();
 		<!-- Page content -->
 		<div class="row">
 			<div class="col-12">
-				<div class="ml-auto">
-					<button class="btn btn-success px-5 float-right" data-toggle="modal" data-target="#followup">Consultation Finish</button>
-				</div>
 				<div class="modal fade" id="followup" tabindex="-1" role="dialog">
-					<div class="modal-dialog" role="document">
+					<div class="modal-dialog modal-lg" role="document">
 						<div class="modal-content">
 							<div class="modal-header">
-								<h6 class="modal-title">Follow Up Visit</h6>
+								<h6 class="modal-title">Add <strong><?= $row["patient_firstname"] . ' ' . $row["patient_lastname"] ?></strong> Follow Up Visit</h6>
 								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 									<span aria-hidden="true">&times;</span>
 								</button>
 							</div>
 							<div class="modal-body">
-								<p>Do <?= $row["patient_firstname"] . ' ' . $row["patient_lastname"] ?> need follow-up visit?</p>
+								<div class="form-group">
+									<label>Treatment Type</label>
+									<select name="inputTreatment" id="inputTreatment" class="form-control">
+										<?php
+											$treatresult = mysqli_query($conn, "SELECT * FROM treatment_type WHERE doctor_id = '" . $doctor_row['doctor_id'] . "'");
+											while($treatrow = mysqli_fetch_assoc($treatresult)) {
+												echo '<option value='.$treatrow['treatment_name'].'>'.$treatrow['treatment_name'].'</option>';
+											}
+										?>
+									</select>
+								</div>
+								<div class="form-row">
+									<div class="form-group col-md-6">
+										<label>Select Date</label>
+										<div id="datepicker" onclick="getDate()"></div>
+									</div>
+									<div class="form-group">
+										<label>Select Time</label>
+										<div id="responsecontainer">
+										</div>
+									</div>
+								</div>
 							</div>
 							<div class="modal-footer">
-								<a href="./appointment.php" class="btn btn-secondary">No</a>
-								<button type="button" class="btn btn-primary">Yes</button>
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+								<button type="submit" name="appointmentbtn" class="btn btn-primary">Save</button>
 							</div>
 						</div>
 					</div>
 				</div>
+
+				<div class="modal fade" id="prescription" tabindex="-1" role="dialog">
+					<div class="modal-dialog modal-lg" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h6 class="modal-title">Add New Prescription</h6>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<form action="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>" method="POST">
+								<?= display_error();?>
+								<div class="modal-body">
+									<div class="form-group">
+										<label>Symptons</label>
+										<textarea name="sympton" class="form-control" id="sympton" cols="30" rows="3"></textarea>
+									</div>
+									<div class="form-group">
+										<label>Diagnosis</label>
+										<input type="text" name="diagnosis" class="form-control" id="diagnosis">
+									</div>
+									<div class="form-group">
+										<label>Advice</label>
+										<textarea name="advice" class="form-control" id="advice" cols="30" rows="3"></textarea>
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+									<button type="submit" name="prescriptionbtn" class="btn btn-primary">Save</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
 			</div>
+
 			<div class="col-md-12">
 				<!-- Card Content -->
 				<div class="card patient-status-bar">
@@ -81,7 +164,7 @@ $medrow = $medresult->fetch_assoc();
 							<div class="flex-fill bd-highlight">
 								<p class="text-muted">Patient Info</p>
 								<h5 class="font-weight-bold"><?php echo $row["patient_lastname"] . ' ' . $row["patient_firstname"] ?></h5>
-								<p><?= $row["patient_age"] ?>,&nbsp; <?= strtoupper($row["patient_gender"]) ?> </p>
+								<p><?= $patient_age ?>,&nbsp; <?= strtoupper($row["patient_gender"]) ?> </p>
 							</div>
 							<div class="flex-fill bd-highlight">
 								<p class="text-muted">Last Visit</p>
@@ -89,14 +172,21 @@ $medrow = $medresult->fetch_assoc();
 									<?php if ($medresult->num_rows == 0) {
 										echo 'New Patient';
 									} else {
-										echo '21-03-2019';
+										echo date_format(new DateTime($medrow['med_date']), 'Y-m-d');
 									}
 									?>
 								</h5>
 							</div>
 							<div class="flex-fill bd-highlight">
 								<p class="text-muted">Diagnosis</p>
-								<h5 class="font-weight-bold">Throat Disease</h5>
+								<h5 class="font-weight-bold">
+									<?php if ($medresult->num_rows == 0) {
+										echo 'New Patient';
+									} else {
+										echo $medrow['med_sympton'];
+									}
+									?>
+								</h5>
 							</div>
 						</div>
 					</div>
@@ -104,39 +194,92 @@ $medrow = $medresult->fetch_assoc();
 			</div>
 
 			<div class="col-md-12 mb-3">
-				<nav class="nav nav-pills flex-column flex-sm-row mb-3">
-					<a class="flex-sm-fill text-sm-center nav-link active" data-toggle="pill" href="#tab1">General</a>
-					<a class="flex-sm-fill text-sm-center nav-link" data-toggle="pill" href="#tab2">Health Record <span class="badge badge-light">4</span></a>
-					<a class="flex-sm-fill text-sm-center nav-link" data-toggle="pill" href="#tab3">Link</a>
+				<nav class="navbar px-0 mb-3">
+					<div class="nav nav-pills mr-auto">
+						<a class="nav-item text-sm-center nav-link active" data-toggle="pill" href="#tab1">Prescription Info</a>
+						<a class="nav-item text-sm-center nav-link" data-toggle="pill" href="#tab2">Medical Info</a>
+						<a class="nav-item text-sm-center nav-link" data-toggle="pill" href="#tab3">Appointment Record</a>
+					</div>
+					<div class=" nav nav-pills ml-auto">
+						<a class="nav-item btn btn-sm btn-link" data-toggle="modal" href="#prescription">Add Prescription</a>
+						<a class="nav-item btn btn-sm btn-link" data-toggle="modal" href="#followup">Add Appointment</a>
+					</div>
 				</nav>
-				<div class="tab-content" id="pills-tabContent">
-					<div class="tab-pane fade show active" id="tab1" role="tabpanel" aria-labelledby="pills-home-tab">
-						<div>
-							<h6>Diagnosis Record</h6>
-							<div class="card">
-								<div class="card-body">
-									<form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
-										<div>
-											<label for="medrecord">Medical Description</label>
-											<textarea name="medrecord" class="form-control" id="medrecord" cols="30" rows="5"></textarea>
-										</div>
-										<div class="mt-1">
-											<label for="medrecord">Advise</label>
-											<textarea name="medrecord" class="form-control" id="medrecord" cols="20" rows="5"></textarea>
-										</div>
-										<button type="submit" class="btn btn-primary px-5 mt-3 float-right">Save</button>
-									</form>
-									<?php
 
-									?>
-								</div>
+				<div class="tab-content" id="pills-tabContent">
+					<div class="tab-pane fade show active" id="tab1" role="tabpanel" aria-labelledby="tab1">
+						<div class="card">
+							<div class="card-body">
+								<table class="table nowrap">
+									<thead>
+										<th>Symptons</th>
+										<th>Diagnosis</th>
+										<th>Date Recorded</th>
+										<th>Action</th>
+									</thead>
+									<tbody>
+										<?php
+										$tresult = $conn->query("SELECT * FROM medical_record WHERE patient_id = $patient_id");
+										if ($tresult->num_rows == 0) {
+											echo '<td colspan="4">No Record Found</td>';
+										} else {
+											while ($trow = $tresult->fetch_assoc()) {
+												?>
+												<tr>
+													<td><?= $trow['med_sympton'] ?></td>
+													<td><?= $trow['med_diagnosis'] ?></td>
+													<td><?= $trow['med_date'] ?></td>
+													<td><button data-toggle="modal" data-target="#viewdiagnosis<?= $trow['med_id']?>" class="btn btn-sm btn-primary px-3">View</button></td>
+												</tr>
+
+												<div class="modal fade" id="viewdiagnosis<?= $trow['med_id']?>" tabindex="-1" role="dialog">
+													<div class="modal-dialog" role="document">
+														<div class="modal-content">
+															<div class="modal-header">
+																<h6 class="modal-title">View Details</h6>
+																<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+																	<span aria-hidden="true">&times;</span>
+																</button>
+															</div>
+															<div class="modal-body">
+																<div class="row">
+																	<p class="col-sm-3 text-right"><b>Symptons</b></p>
+																	<div class="col-sm-6">
+																	<p><?= $trow['med_sympton'] ?></p>
+																	</div>
+																</div>
+																<div class="row">
+																	<p class="col-sm-3 text-right"><b>Diagnosis</b></p>
+																	<div class="col-sm-6">
+																	<p><?= $trow['med_diagnosis'] ?></p>
+																	</div>
+																</div>
+																<div class="row">
+																	<p class="col-sm-3 text-right"><b>Advice</b></p>
+																	<div class="col-sm-6">
+																	<p><?= $trow['med_advice'] ?></p>
+																	</div>
+																</div>
+															</div>
+															<div class="modal-footer">
+																<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+															</div>
+														</div>
+													</div>
+												</div>
+										<?php
+											}
+										}
+										?>
+									</tbody>
+								</table>
 							</div>
 						</div>
 					</div>
 
-					<div class="tab-pane fade" id="tab2" role="tabpanel" aria-labelledby="pills-profile-tab">
+					<div class="tab-pane fade" id="tab2" role="tabpanel" aria-labelledby="tab2">
 						<div class="row">
-							<div class="col-md-6">
+							<div class="col-md-12">
 								<h6>Latest Status</h6>
 								<div class="card">
 									<div class="card-body">
@@ -159,49 +302,39 @@ $medrow = $medresult->fetch_assoc();
 									</div>
 								</div>
 							</div>
+						</div>
+					</div>
 
-							<div class="col-md-6">
-								<h6>Medical History</h6>
-								<div class="card">
-									<div class="card-body">
-										<table class="table">
-											<thead>
-												<tr>
-													<th scope="col">Med ID #</th>
-													<th scope="col">Type</th>
-													<th scope="col">Date Recorded</th>
-													<th scope="col">Action</th>
-												</tr>
-											</thead>
-											<tbody>
-												<?php
-												$tresult = $conn->query("SELECT * FROM medical_diagnosis WHERE patient_id = $patient_id");
-												if ($tresult->num_rows == 0) {
-													echo '<td colspan="4">No Record Found</td>';
-												} else {
-													while ($trow = $tresult->fetch_assoc()) {
-														?>
-														<tr>
-															<th scope="row">1</th>
-															<td>illness</td>
-															<td>2019-01-01</td>
-															<td><button class="btn btn-sm btn-primary">View</button></td>
-														</tr>
-												<?php
-													}
-												}
+					<div class="tab-pane fade" id="tab3" role="tabpanel" aria-labelledby="tab3">
+						<div class="card">
+							<div class="card-body">
+								<table class="table nowrap">
+									<thead>
+										<th>Date</th>
+										<th>Treatment</th>
+									</thead>
+									<tbody>
+										<?php
+										$tresult = $conn->query("SELECT * FROM appointment WHERE patient_id = $patient_id");
+										if ($tresult->num_rows == 0) {
+											echo '<td colspan="2">No Record Found</td>';
+										} else {
+											while ($trow = $tresult->fetch_assoc()) {
 												?>
-											</tbody>
-										</table>
-									</div>
-								</div>
+												<tr>
+													<td><?= $trow['app_date'] ?></td>
+													<td><?= $trow['treatment_type'] ?></td>
+												</tr>
+										<?php
+											}
+										}
+										?>
+									</tbody>
+								</table>
 							</div>
 						</div>
 					</div>
 
-					<div class="tab-pane fade" id="tab3" role="tabpanel" aria-labelledby="pills-contact-tab">
-						3
-					</div>
 				</div>
 			</div>
 
@@ -210,6 +343,35 @@ $medrow = $medresult->fetch_assoc();
 	</div>
 
 	<?php include JS_PATH; ?>
+	<script type="text/javascript">
+		$(function() {
+			$('#datepicker').datetimepicker({
+				inline: true,
+				minDate: '<?= $current_date ?>',
+				format: 'YYY-MM-DD',
+			});
+		}).on('dp.change', function(event) {
+			var formatted = event.date.format('YYYY-MM-DD');
+			loadData(formatted);
+		});
+
+		function loadData(formatted) {
+			$.ajax({
+				type: "POST",
+				data: {
+					date: formatted
+				},
+				url: 'loadSchedule.php',
+				dateType: "html",
+				success: function(response) {
+					$("#responsecontainer").html(response);
+				}
+			});
+		}
+
+
+		$('#followup').modal('show');
+	</script>
 </body>
 
 </html>

@@ -24,13 +24,6 @@ include('./includes/session.inc.php');
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Hi, <?php echo $doctor_row["doctor_lastname"] . ' ' . $doctor_row["doctor_firstname"]; ?></h5>
-                        <p class="card-text">We are here to serve you.</p>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-body">
                         <canvas id="myChart"></canvas>
                         <script>
                             Chart.platform.disableCSSInjection = true;

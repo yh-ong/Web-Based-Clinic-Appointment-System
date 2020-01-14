@@ -57,9 +57,11 @@
 			<div class="card-body d-flex">
 				<div class="widget-left">
 					<div class="widget-titles">
-						<h6>Total Patients</h6>
+						<h6>Total Treatment</h6>
 					</div>
-					<span class="widget-numbers">2,356</span>
+					<span class="widget-numbers">
+						<?= $tr_row ?>
+					</span>
 				</div>
 				<div class="widget-icons bg-oren">
 					<div class="c-oren">

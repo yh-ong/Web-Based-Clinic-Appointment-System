@@ -6,7 +6,7 @@ require_once('./includes/path.inc.php');
 <html>
 <head>
     <?php include 'layouts/meta.php'; ?>
-    <?php include CSS_FILE; ?>
+    <?php include CSS_PATH; ?>
     <link rel="stylesheet" href="./css/login.css">
 </head>
 <body>
@@ -46,7 +46,7 @@ require_once('./includes/path.inc.php');
             </div>
         </div>
     </div>
-    <?php include SCRIPT_FILE;?>
+    <?php include JS_PATH;?>
 </body>
 </html>
 <?php

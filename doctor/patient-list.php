@@ -23,7 +23,7 @@ include('./includes/session.inc.php');
 						<?php
 						function headerTable()
 						{
-							$header = array("Patient ID", "Patient Name", "Contact Number", "Date Added", "Action");
+							$header = array("Name", "Phone", "Email", "Action");
 							$arrlen = count($header);
 							for ($i = 0; $i < $arrlen; $i++) {
 								echo "<th>" . $header[$i] . "</th>" . PHP_EOL;
@@ -47,12 +47,11 @@ include('./includes/session.inc.php');
 										);
 									while ($trow = $tresult->fetch_assoc()) {
 										?><tr>
-											<td><?= $trow["patient_id"]; ?></td>
 											<td><?= $trow["patient_lastname"] . ' ' . $trow["patient_firstname"]; ?></td>
 											<td><?= $trow["patient_contact"]; ?></td>
-											<td><?= $trow["date_created"]; ?></td>
+											<td><?= $trow["patient_email"]; ?></td>
 											<td>
-												<a href="patient-view.php?id=<?= $trow["patient_id"]; ?>" class="btn btn-sm btn-primary"><i class="fa fa-eye"></i> View</a>
+												<a href="patient-view.php?id=<?= $trow["patient_id"]; ?>" class="btn btn-sm btn-outline-info"><i class="fa fa-eye"></i> View</a>
 											</td>
 										</tr>
 									<?php

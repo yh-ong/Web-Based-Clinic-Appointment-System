@@ -16,7 +16,7 @@
                     <a href="index.php" class="nav-link"><i class="fas fa-tachometer-alt mr-3 fa-fw"></i>Dashboard</a>
                 </li>
                 <li class="nav-item <?php if (stripos($_SERVER['REQUEST_URI'],'doctor.php') !== FALSE) {echo 'mm-active';} ?>">
-                    <a href="doctor.php" class="nav-link"><i class="fas fa-stethoscope mr-3 fa-fw"></i>Doctor Profile</a>
+                    <a href="doctor.php" class="nav-link"><i class="fas fa-stethoscope mr-3 fa-fw"></i>Profile</a>
                 </li>
                 <li class="nav-item <?php if (stripos($_SERVER['REQUEST_URI'],'patient-list.php') !== FALSE) {echo 'mm-active';} ?>">
                     <a href="patient-list.php" class="nav-link" ><i class="fas fa-user-injured mr-3 fa-fw"></i>Patients</a>
@@ -27,15 +27,21 @@
                 <li class="nav-item <?php if (preg_match('/(schedule)/',$_SERVER["REQUEST_URI"]) == TRUE) {echo 'mm-active';} ?>">
                     <a href="#" class="nav-link has-arrow" aria-expanded="false"><i class="fa fa-user-clock mr-3 fa-fw"></i>Schedule</a>
                     <ul class="side-collapse">
-                        <a href="schedule.php" class="nav-link"><i class="far fa-calendar-alt mr-3 fa-fw"></i>View Schedule</a>
+                        <a href="sch-list.php" class="nav-link"><i class="far fa-calendar mr-3 fa-fw"></i>Manage Schedule</a>
                         <a href="schedule-setup.php" class="nav-link"><i class="far fa-calendar-plus mr-3 fa-fw"></i>Schedule Setup</a>
-                        <a href="schedule-list.php" class="nav-link"><i class="fas fa-list mr-3 fa-fw"></i>Schedule List</a>
+                        <!-- <a href="schedule.php" class="nav-link"><i class="far fa-calendar-alt mr-3 fa-fw"></i>View Schedule</a> -->
                     </ul>
                 </li>
                 <!-- End Upper -->
                 <p class="sidebar-heading px-3 pb-1 mb-0">Others</p>
                 <li class="nav-item <?php if (stripos($_SERVER['REQUEST_URI'],'treatment.php') !== FALSE) {echo 'mm-active';} ?>">
                     <a href="treatment.php" class="nav-link"><i class="fas fa-stream mr-3 fa-fw"></i>Treatment Type</a>
+                </li>
+                <li class="nav-item <?php if (stripos($_SERVER['REQUEST_URI'],'review.php') !== FALSE) {echo 'mm-active';} ?>">
+                    <a href="review.php" class="nav-link"><i class="fas fa-star mr-3 fa-fw"></i>Review</a>
+                </li>
+                <li class="nav-item <?php if (stripos($_SERVER['REQUEST_URI'],'report.php') !== FALSE) {echo 'mm-active';} ?>">
+                    <a href="report.php" class="nav-link"><i class="fas fa-chart-area mr-3 fa-fw"></i>Report</a>
                 </li>
             </ul>
         </div>

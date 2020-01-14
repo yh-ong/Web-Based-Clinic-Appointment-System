@@ -17,7 +17,7 @@ include('./includes/session.inc.php');
         <!-- Page content -->
         <div class="row">
             <div class="col-12 mt-3 mb-3">
-                <a href="./doctor-edit.php" class="btn btn-primary btn-sm pull-right px-5">Edit Doctor Profile</a>
+                <a href="./doctor-edit.php" class="btn btn-primary btn-sm pull-right px-5">Edit Profile</a>
             </div>
 
             <div class="col-md-3">
