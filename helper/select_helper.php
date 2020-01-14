@@ -37,6 +37,8 @@ $select_state = array(
  * Nationality
  */
 $select_nationality = array(
+    "Malaysia",
+    "Singaporean",
     "Afghan",
     "Albanian",
     "Algerian",
@@ -144,7 +146,6 @@ $select_nationality = array(
     "Macedonian",
     "Malagasy",
     "Malawian",
-    "Malaysia",
     "Maldivan",
     "Malian",
     "Maltese",
@@ -194,7 +195,6 @@ $select_nationality = array(
     "Serbian",
     "Seychellois",
     "Sierra Leonean",
-    "Singaporean",
     "Slovakian",
     "Slovenian",
     "Solomon Islander",
