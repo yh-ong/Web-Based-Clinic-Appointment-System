@@ -31,11 +31,11 @@
 			/* font-family: 'Poppins', sans-serif; */
 		}
 
-		.wrapper {
-			/* background: #fff;
+		/* .wrapper {
+			background: #fff;
     margin-bottom: 270px;
-    box-shadow: 0px 25px 10px -15px rgba(0,0,0,0.08);  */
-		}
+    box-shadow: 0px 25px 10px -15px rgba(0,0,0,0.08); 
+		} */
 
 		.navbar {
 			padding-top: 2rem;
@@ -268,8 +268,8 @@ FOR ANIMATION
 							</a>
 							<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
 								<a class="dropdown-item" href="#patient">Patient</a>
-								<a class="dropdown-item" href="app/clinic/login.php">Clinic</a>
-								<a class="dropdown-item" href="app/doctor/login.php">Doctor</a>
+								<a class="dropdown-item" href="clinic/login.php">Clinic</a>
+								<a class="dropdown-item" href="doctor/login.php">Doctor</a>
 							</div>
 						</li>
 					</ul>
@@ -422,7 +422,7 @@ FOR ANIMATION
 						<img src="./assets/img/app-banner.webp" alt="" width="380px">
 					</div>
 					<div class="col-7">
-						<h1>Download the Practo app</h1>
+						<h1>Download the ClinicMe app</h1>
 						<p>Book appointments and health checkups;<br>Order medicines and consult doctors online</p>
 						<img src="./assets/img/google-play.png" alt="Play Button" width="180px">
 					</div>
