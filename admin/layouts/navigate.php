@@ -15,8 +15,12 @@
                 <li class="nav-item <?php if (stripos($_SERVER['REQUEST_URI'],'index.php') !== FALSE) {echo 'mm-active';} ?>">
                     <a href="index.php" class="nav-link"><i class="fas fa-th-large mr-3 fa-fw"></i>Dashboard</a>
                 </li>
-                <li class="nav-item <?php if (stripos($_SERVER['REQUEST_URI'],'clinic.php') !== FALSE) {echo 'mm-active';} ?>">
-                    <a href="clinic.php" class="nav-link"><i class="fas fa-clinic-medical mr-3 fa-fw"></i>Clinic</a>
+                <li class="nav-item <?php if (preg_match('/(clinic)/',$_SERVER["REQUEST_URI"]) == TRUE) {echo 'mm-active';} ?>">
+                    <a href="#" class="nav-link has-arrow" aria-expanded="false"><i class="fas fa-clinic-medical mr-3 fa-fw"></i>Clinic</a>
+                    <ul class="side-collapse">
+                        <a href="clinic-list.php" class="nav-link"><i class="fa fa-clipboard-list mr-3 fa-fw"></i>Clinic List</a>
+                        <a href="clinic-add.php" class="nav-link"><i class="fa fa-user-plus mr-3 fa-fw"></i>Add Clinic</a>
+                    </ul>
                 </li>
                 <li class="nav-item <?php if (preg_match('/(doctor)/',$_SERVER["REQUEST_URI"]) == TRUE) {echo 'mm-active';} ?>">
                     <a href="#" class="nav-link has-arrow" aria-expanded="false"><i class="fas fa-user-md mr-3 fa-fw"></i>Doctors</a>
@@ -29,15 +33,15 @@
                     <a href="#" class="nav-link has-arrow" aria-expanded="false"><i class="fa fa-street-view mr-3 fa-fw"></i>Patients</a>
                     <ul class="side-collapse">
                         <a href="patient-list.php" class="nav-link"><i class="fa fa-clipboard-list mr-3 fa-fw"></i>Patient List</a>
-                        <a href="patient-add.php" class="nav-link"><i class="fa fa-user-plus mr-3 fa-fw"></i>Add Patient</a>
+                        <!-- <a href="patient-add.php" class="nav-link"><i class="fa fa-user-plus mr-3 fa-fw"></i>Add Patient</a> -->
                     </ul>
                 </li>
                 <li class="nav-item <?php if (stripos($_SERVER['REQUEST_URI'],'appointment.php') !== FALSE) {echo 'mm-active';} ?>">
                     <a href="appointment.php" class="nav-link" ><i class="fas fa-calendar-check mr-3 fa-fw"></i>Appointment</a>
                 </li>
-                <li class="nav-item <?php if (stripos($_SERVER['REQUEST_URI'],'schedule.php') !== FALSE) {echo 'mm-active';} ?>">
+                <!-- <li class="nav-item <?php if (stripos($_SERVER['REQUEST_URI'],'schedule.php') !== FALSE) {echo 'mm-active';} ?>">
                     <a href="schedule.php" class="nav-link" ><i class="fa fa-user-clock mr-3 fa-fw"></i>Schedule</a>
-                </li>
+                </li> -->
                 <!-- <li class="nav-item <?php if (preg_match('/(schedule)/',$_SERVER["REQUEST_URI"]) == TRUE) {echo 'mm-active';} ?>">
                     <a href="#" class="nav-link has-arrow" aria-expanded="false"><i class="fa fa-user-clock mr-3 fa-fw"></i>Schedule</a>
                     <ul class="side-collapse">
@@ -48,12 +52,15 @@
                 <!-- End Upper -->
                 <!-- Lower -->
                 <p class="sidebar-heading px-3 pb-1 mb-0">Others</p>
-                <li class="nav-item <?php if (stripos($_SERVER['REQUEST_URI'],'announcement.php') !== FALSE) {echo 'mm-active';} ?>">
-                    <a href="announcement.php" class="nav-link"><i class="fa fa-bullhorn mr-3 fa-fw"></i>Announcement</a>
+                <li class="nav-item <?php if (stripos($_SERVER['REQUEST_URI'],'speciality.php') !== FALSE) {echo 'mm-active';} ?>">
+                    <a href="speciality.php" class="nav-link"><i class="fas fa-tags mr-3 fa-fw"></i>Speciality</a>
                 </li>
-                <li class="nav-item <?php if (stripos($_SERVER['REQUEST_URI'],'report.php') !== FALSE) {echo 'mm-active';} ?>">
+                <!-- <li class="nav-item <?php if (stripos($_SERVER['REQUEST_URI'],'language.php') !== FALSE) {echo 'mm-active';} ?>">
+                    <a href="language.php" class="nav-link"><i class="fas fa-language mr-3 fa-fw"></i>Langauge</a>
+                </li> -->
+                <!-- <li class="nav-item <?php if (stripos($_SERVER['REQUEST_URI'],'report.php') !== FALSE) {echo 'mm-active';} ?>">
                     <a href="report.php" class="nav-link"><i class="fa fa-chart-bar mr-3 fa-fw"></i>Report</a>
-                </li>
+                </li> -->
                 <!-- End Lower -->
             </ul>
         </div>

@@ -1,208 +1,406 @@
 <?php
-require_once("includes/dbconnection.php");
-include("includes/session.php");
-include("includes/config.php");
+require_once('../config/autoload.php');
+include('includes/path.inc.php');
+include('includes/session.inc.php');
+include(SELECT_HELPER);
+
 
 $id = $_REQUEST['cid'];
 $decoded_id = base64_decode(urldecode($id));
 
 $result = mysqli_query($conn, "SELECT * FROM clinics WHERE clinic_id = ".$decoded_id."");
-$row = mysqli_fetch_assoc($result);
-ob_start();
+$clinic_row = mysqli_fetch_assoc($result);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <?php include 'includes/styles.php'; ?>
+	<?php include CSS_PATH; ?>
 </head>
 
 <body>
-    <?php include 'includes/navigate.php'; ?>
-    <div class="page-content" id="content">
-        <?php include 'includes/header.php'; ?>
-        <!-- Page content -->
-        <div class="row">
-            <div class="col-12">
-                <!-- Card Content -->
-                <form name="regform" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+	<?php include NAVIGATION; ?>
+	<div class="page-content" id="content">
+		<?php include HEADER; ?>
+		<?php
+			$errName = $errContact = $errEmail = $errURL  = $errAddress = $errCity = $errState = $errZipcode = "";
+			$className = $classContact = $classEmail = $classURL = $classAddress = $classCity = $classState = $classZipcode = "";
+			
+			if (isset($_POST["savebtn"])) {
+				$clinic_status = escape_input($_POST["inputStatus"]);
+				$clinic_name = escape_input($_POST["inputClinicName"]);
+				$contact = escape_input($_POST["inputContact"]);
+				$email = escape_input($_POST["inputEmailAddress"]);
+				$url = escape_input($_POST["inputURL"]);
+			
+				$opensweek = escape_input($_POST["inputOpensHourWeek"]);
+				$closeweek = escape_input($_POST["inputCloseHourWeek"]);
+			
+				$openssat = escape_input($_POST["inputOpensHourSat"]);
+				$closesat = escape_input($_POST["inputCloseHourSat"]);
+			
+				$openssun = escape_input($_POST["inputOpensHourSun"]);
+				$closesun = escape_input($_POST["inputCloseHourSun"]);
+			
+				$address = escape_input($_POST["inputAddress"]);
+				$city = escape_input($_POST["inputCity"]);
+				if (isset($_POST['inputState'])) {
+					$state = escape_input($_POST['inputState']);
+				}
+				$zipcode = escape_input($_POST["inputZipCode"]);
+			
+				// Validate
+				if (empty($clinic_name)) {
+					$errName = $error_html['errFirstName'];
+					$className = $error_html['errClass'];
+				} else {
+					if (!preg_match($regrex['text'], $clinic_name)) {
+						$errName = $error_html['invalidText'];
+						$className = $error_html['errClass'];
+					}
+				}
+			
+				if (empty($url)) {
+					$errURL = $error_html['errURL'];
+					$classURL = $error_html['errClass'];
+				} else {
+					if (!filter_var($url, FILTER_VALIDATE_URL)) {
+						$errURL =  $error_html['invalidURL'];
+						$classURL = $error_html['errClass'];
+					}
+				}
+			
+				if (empty($email)) {
+					$errEmail = $error_html['errEmail'];
+					$classEmail = $error_html['errClass'];
+				} else {
+					if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+						$errEmail =  $error_html['invalidEmail'];
+						$classEmail = $error_html['errClass'];
+					}
+				}
+			
+				if (empty($contact)) {
+					$errContact = $error_html['errContact'];
+					$classContact = $error_html['errClass'];
+				} else {
+					if (!preg_match($regrex['contact'], $contact)) {
+						$errContact = $error_html['invalidContact'];
+						$classContact = $error_html['errClass'];
+					}
+				}
+			
+				if (empty($address)) {
+					$errAddress = $error_html['errAddress'];
+					$classAddress = $error_html['errClass'];
+				} else {
+					if (!preg_match($regrex['text'], $address)) {
+						$errAddress = $error_html['invalidText'];
+						$classAddress = $error_html['errClass'];
+					}
+				}
+			
+				if (empty($city)) {
+					$errCity = $error_html['errCity'];
+					$classCity = $error_html['errClass'];
+				} else {
+					if (!preg_match($regrex['text'], $city)) {
+						$errCity = $error_html['invalidText'];
+						$classCity = $error_html['errClass'];
+					}
+				}
+			
+				if (empty($zipcode)) {
+					$errZipcode = $error_html['errZipcode'];
+					$classZipcode = $error_html['errClass'];
+				} else {
+					if (!filter_var($zipcode, FILTER_VALIDATE_INT)) {
+						$errZipcode = $error_html['invalidInt'];
+						$errZipcode = $error_html['errClass'];
+					}
+				}
+			
+				if (empty($state)) {
+					$errState = $error_html['errState'];
+					$classState = $error_html['errClass'];
+				}
+			
+				if (multi_empty($errName, $errContact, $errURL, $errEmail, $errAddress, $errCity, $errState, $errZipcode)) {
+					$clinicstmt = $conn->prepare("UPDATE clinics SET clinic_name = ?, clinic_email = ?, clinic_url = ?, clinic_contact = ?, clinic_address = ?, clinic_city = ?, clinic_state = ?, clinic_zipcode = ?, clinic_status = ? WHERE clinic_id = ?");
+					$clinicstmt->bind_param("sssssssssi", $clinic_name, $email, $url, $contact, $address, $city, $state, $zipcode, $clinic_status, $clinic_row['clinic_id']);
+			
+					$hourstmt = $conn->prepare("UPDATE business_hour SET open_week = ?, close_week = ?, open_sat = ?, close_sat = ?, open_sun = ?, close_sun = ? WHERE clinic_id = ?");
+					$hourstmt->bind_param("sssssss", $opensweek, $closeweek, $openssat, $closesat, $openssun, $closesun, $clinic_row['clinic_id']);
+			
+					if ($clinicstmt->execute() && $hourstmt->execute()) {
+						echo '<script>
+							Swal.fire({ title: "Great!", text: "Record Updated!", type: "success" }).then((result) => {
+								if (result.value) { window.location.href = "clinic-list.php"; }
+							});
+						</script>';
+					} else {
+						echo '<script>Swal.fire({ title: "Oops...!", text: "Something Happen!", type: "error" });</script>';
+					}
+				}
+			}
+		?>
+		<!-- Page content -->
+		<div class="row">
+			<div class="col-12">
+				<form name="regform" method="POST" action="<?php echo htmlspecialchars($_SERVER["REQUEST_URI"]); ?>">
+					<h5 class="card-title mt-3">
+						Clinic Profile Info
+					</h5>
+					<div class="card">
+						<div class="card-body">
+							<div class="form-row">
+								<div class="form-group col-md-6">
+									<label for="inputStatus">Clinic ID #</label>
+									<select name="inputStatus" id="inputStatus" class="form-control">
+										<option value="1" <?= $clinic_row["clinic_status"] == 1 ? "selected" : "" ?>>Approve</option>
+										<option value="0" <?= $clinic_row["clinic_status"] == 0 ? "selected" : "" ?>>Not Approved</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-row">
+								<div class="form-group col-md-6">
+									<label for="inputDoctorID">Clinic ID #</label>
+									<input type="text" name="inputClinicID" class="form-control" id="inputClinicID" readonly value="<?php echo $clinic_row["clinic_id"]; ?>">
+								</div>
+							</div>
+							<div class="form-row">
+								<div class="form-group col-md-6">
+									<label for="inputClinicName">Clinic Name</label>
+									<input type="text" name="inputClinicName" class="form-control <?= $className ?>" id="inputClinicName" placeholder="" value="<?php echo $clinic_row["clinic_name"]; ?>">
+									<?= $errName; ?>
+								</div>
+							</div>
+							<div class="form-row">
+								<div class="form-group col-md-6">
+									<label for="inputContact">Contact Number</label>
+									<input type="text" name="inputContact" class="form-control <?= $classContact ?>" id="inputContact" placeholder="" value="<?php echo $clinic_row["clinic_contact"]; ?>">
+									<?= $errContact; ?>
+								</div>
+								<div class="form-group col-md-6">
+									<label for="inputEmailAddress">Email Address</label>
+									<input type="text" name="inputEmailAddress" class="form-control <?= $classEmail ?>" id="inputEmailAddress" placeholder="example@address.com" value="<?php echo $clinic_row["clinic_email"]; ?>">
+									<?= $errEmail; ?>
+								</div>
+								<div class="form-group col-md-6">
+									<label for="inputURL">URL</label>
+									<input type="text" name="inputURL" class="form-control <?= $classURL ?>" id="inputURL" placeholder="www.example.com" value="<?php echo $clinic_row["clinic_url"]; ?>">
+									<?= $errURL; ?>
+								</div>
+							</div>
+						</div>
+					</div>
 
-                    <div class="card shadow-sm rounded">
-                        <div class="card-body">
-                            <div class="card-inner">
-                                <!-- Add Clinic -->
-                                <div class="form-row">
-                                    <div class="form-group col-md-6">
-                                        <label for="inputDoctorID">Clinic ID #</label>
-                                        <input type="text" name="inputDoctorID" class="form-control" id="inputDoctorID" disabled value="<?php echo $row["clinic_id"];?>">
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label for="inputClinicStatus">Clinic Status</label>
-                                        <select name="inputClinicStatus" class="form-control" id="inputClinicStatus">
-                                            <option value="" selected disabled>Choose</option>
-                                            <option value="Approve" <?php if($row["clinic_status"] == 'Approve') echo'selected'?>>Approve</option>
-                                            <option value="Not Approve" <?php if($row["clinic_status"] == 'Not Approve') echo'selected'?>>Not Approve</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group col-md-6">
-                                        <label for="inputClinicName">Clinic Name</label>
-                                        <input type="text" name="inputClinicName" class="form-control" id="inputClinicName" placeholder="" value="<?php echo $row["clinic_name"];?>">
-                                    </div>
-                                </div>
-                                <!-- End Add Clinic -->
-                            </div>
-                        </div>
-                    </div>
+					<div class="card">
+						<div class="card-body">
+							<span class="card-title">Business Hour</span>
+							<div class="mb-2">
+								<small class="text-muted">When you're closed on a certain day, just leave the hours blank.</small>
+								<small class="text-muted">Remember: 12PM is midday, 12AM is midnight</small>
+							</div>
+							<?php
+							$hour_row = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM business_hour WHERE clinic_id = ".$clinic_row["clinic_id"]." "));
+							?>
+							<div class="form-group row">
+								<label for="inputBusinessHourWeek" class="col-sm-2 col-form-label">Monday - Friday</label>
+								<!-- <div class="col-sm-2">
+									<select name="" class="form-control form-control-sm" id="">
+										<option value="">Select</option>
+										<option value="open">Open</option>
+										<option value="close">Close</option>
+									</select>
+								</div> -->
+								<div class="col-sm-3">
+									<input type="text" class="form-control form-control timepicker" name="inputOpensHourWeek" value="<?= $hour_row["open_week"]; ?>">
+								</div><span>--</span>
+								<div class="col-sm-3">
+									<input type="text" class="form-control form-control timepicker" name="inputCloseHourWeek" value="<?= $hour_row["close_week"]; ?>">
+								</div>
+							</div>
+							<div class="form-group row">
+								<label for="inputBusinessHourSat" class="col-sm-2 col-form-label">Saturday</label>
+								<div class="col-sm-3">
+									<input type="text" class="form-control form-control timepicker" name="inputOpensHourSat" value="<?= $hour_row["open_sat"]; ?>">
+								</div><span>--</span>
+								<div class="col-sm-3">
+									<input type="text" class="form-control form-control timepicker" name="inputCloseHourSat" value="<?= $hour_row["close_sat"]; ?>">
+								</div>
+							</div>
 
-                    <div class="card shadow-sm rounded">
-                        <div class="card-body">
-                            <div class="card-inner">
-                                <!-- Add Clinic -->
-                                <div class="form-row">
-                                    <div class="form-group col-md-6">
-                                        <label for="inputContact">Contact Number</label>
-                                        <input type="text" name="inputContact" class="form-control" id="inputContact" placeholder="" value="<?php echo $row["clinic_contact"];?>">
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label for="inputFax">Fax Number</label>
-                                        <input type="text" name="inputFax" class="form-control" id="inputFax" placeholder="" value="<?php echo $row["clinic_fax"];?>">
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group col-md-6">
-                                        <label for="inputEmailAddress">Email Address</label>
-                                        <input type="text" name="inputEmailAddress" class="form-control" id="inputEmailAddress" placeholder="example@address.com" value="<?php echo $row["clinic_email"];?>">
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label for="inputURL">URL</label>
-                                        <input type="text" name="inputURL" class="form-control" id="inputURL" placeholder="www.example.com" value="<?php echo $row["clinic_url"];?>">
-                                    </div>
-                                </div>
-                                <!-- End Add Clinic -->
-                            </div>
-                        </div>
-                    </div>
+							<div class="form-group row">
+								<label for="inputBusinessHourSun" class="col-sm-2 col-form-label">Sunday</label>
+								<div class="col-sm-3">
+									<input type="text" class="form-control form-control timepicker" name="inputOpensHourSun" value="<?= $hour_row["open_sun"]; ?>">
+								</div><span>--</span>
+								<div class="col-sm-3">
+									<input type="text" class="form-control form-control timepicker" name="inputCloseHourSun" value="<?= $hour_row["close_sun"]; ?>">
+								</div>
+							</div>
+							<!-- <div id="new_chq"></div>
+							<input type="hidden" value="1" id="total_chq">
+							<div class="d-flelx">
+								<button type="button" class="btn btn-primary" id="add">Add</button>
+								<button type="button" class="btn btn-primary" id="remove">Remove</button>
+							</div> -->
+						</div>
+					</div>
 
-                    <div class="card shadow-sm rounded">
-                        <div class="card-body">
-                            <div class="card-inner">
-                                <!-- Add Patient -->
-                                <div class="form-group">
-                                    <label for="inputAddress">Address</label>
-                                    <input type="text" name="inputAddress" class="form-control" id="inputAddress" placeholder="1234 Main St" value="<?php echo $row["clinic_address"];?>">
-                                </div>
-                                <div class="form-group">
-                                    <label for="inputAddress2">Address 2</label>
-                                    <input type="text" name="inputAddress2" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor">
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group col-md-6">
-                                        <label for="inputCity">City</label>
-                                        <input type="text" name="inputCity" class="form-control" id="inputCity" value="<?php echo $row["clinic_city"];?>">
-                                    </div>
-                                    <div class="form-group col-md-4">
-                                        <label for="inputState">State</label>
-                                        <select name="inputState" id="inputState" class="form-control selectpicker" data-live-search="true">
-                                            <option value="" selected disabled>Choose</option>
-                                            <?php foreach ($select_state as $state_value) {
-                                                if($row["clinic_state"] == "$state_value") {
-                                                    $selected = "selected";
-                                                } else {
-                                                    $selected = "";
-                                                }
-                                                echo '<option value="'.$state_value.'"'.$selected.'>'.$state_value.'</option>';
+					<div class="card">
+						<div class="card-body">
+							<div class="form-group">
+								<label for="inputAddress">Address</label>
+								<input type="text" name="inputAddress" class="form-control <?= $classAddress ?>" id="inputAddress" placeholder="1234 Main St" value="<?php echo $clinic_row["clinic_address"]; ?>">
+								<?= $errAddress; ?>
+							</div>
+							<div class="form-row">
+								<div class="form-group col-md-6">
+									<label for="inputCity">City</label>
+									<input type="text" name="inputCity" class="form-control <?= $classCity ?>" id="inputCity" value="<?php echo $clinic_row["clinic_city"]; ?>">
+									<?= $errCity; ?>
+								</div>
+								<div class="form-group col-md-4">
+									<label for="inputState">State</label>
+									<select name="inputState" id="inputState" class="form-control selectpicker <?= $classState ?>" data-live-search="true">
+										<option value="" selected disabled>Choose</option>
+										<?php foreach ($select_state as $state_value) {
+											if ($clinic_row["clinic_state"] == "$state_value") {
+												$selected = "selected";
+											} else {
+												$selected = "";
+											}
+											echo '<option value="' . $state_value . '"' . $selected . '>' . $state_value . '</option>';
+										} ?>
+									</select>
+									<?= $errState; ?>
+								</div>
+								<div class="form-group col-md-2">
+									<label for="inputZipCode">Zip Code</label>
+									<input type="text" name="inputZipCode" class="form-control <?= $classZipcode ?>" id="inputZipCode" value="<?php echo $clinic_row["clinic_zipcode"]; ?>">
+									<?= $errZipcode; ?>
+								</div>
+							</div>
+						</div>
+					</div>
 
-                                                    
-                                            } ?>
-                                        </select>
-                                    </div>
-                                    <div class="form-group col-md-2">
-                                        <label for="inputZipCode">Zip Code</label>
-                                        <input type="text" name="inputZipCode" class="form-control" id="inputZipCode" value="<?php echo $row["clinic_zipcode"];?>">
-                                    </div>
-                                </div>
-                                <!-- End Add Patient -->
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3 mt-3">
-                        <button type="submit" class="btn btn-primary btn-block" name="savebtn">Add Clinic</button>
-                    </div>
-                </form>
-                <!-- End Card Content -->
-            </div>
-        </div>
-        <!-- End Page Content -->
-    </div>
-    <?php include 'includes/footer.php'; ?>
-    <script>
-        // Example starter JavaScript for disabling form submissions if there are invalid fields
-        (function() {
-            'use strict';
-            window.addEventListener('load', function() {
-                // Fetch all the forms we want to apply custom Bootstrap validation styles to
-                var forms = document.getElementsByClassName('needs-validation');
-                // Loop over them and prevent submission
-                var validation = Array.prototype.filter.call(forms, function(form) {
-                    form.addEventListener('submit', function(event) {
-                        if (form.checkValidity() === false) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-            }, false);
-        })();
-    </script>
+					<div class="mb-3 mt-3">
+						<button type="submit" class="btn btn-primary btn-block" name="savebtn">Save</button>
+					</div>
+				</form>
+			</div>
+			
+			<div class="col-12">
+				<hr>
+				<h5 class="card-title mt-3">
+					Clinic Cover Image
+				</h5>
+				<form name="imgform" method="POST" action="<?php echo htmlspecialchars($_SERVER["REQUEST_URI"]); ?>" enctype="multipart/form-data">
+					<div class="card">
+						<div class="card-body">
+							<div class="input-group mb-3">
+								<div class="custom-file">
+									<input type="file" name="inputImageUpload[]" class="custom-file-input" id="inputImageUpload" multiple>
+									<label class="custom-file-label" for="inputImageUpload">Choose file</label>
+								</div>
+								<div class="input-group-prepend">
+									<button type="submit" name="uploadbtn" class="btn btn-primary btn-sm px-4" id="inputGroupFileImage">Upload</button>
+								</div>
+							</div>
+
+							<div class="row">
+								<?php
+								$table_result = mysqli_query($conn, "SELECT * FROM clinic_images WHERE clinic_id = " . $clinic_row['clinic_id'] . "");
+								$count = mysqli_num_rows($table_result);
+								if ($count == 0) {
+									echo '<div class="col mt-2">
+								<div class="text-center">
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-octagon"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12" y2="16"></line></svg>
+								<h6 class="mt-2">No Image Available</h6>
+								</div></div>';
+								} else {
+									while ($table_row = mysqli_fetch_assoc($table_result)) {
+										if (!empty($table_row["clinicimg_filename"])) {
+											echo '<div class="col-sm-3">
+										<img src="../uploads/' . $clinic_row["clinic_id"] . '/clinic/' . $table_row["clinicimg_filename"] . '" class="img-thumbnail" width="300px" alt="">
+										</div>';
+										} else {
+											echo '<div class="col-sm-3">
+										<img src="../assets/img/empty/empty-image.png" class="img-thumbnail" width="300px" alt="">
+										</div>';
+										}
+									}
+								}
+								?>
+							</div>
+
+						</div>
+					</div>
+				</form>
+			</div>
+
+		</div>
+		<!-- End Page Content -->
+	</div>
+	<?php include JS_PATH; ?>
+	<script>
+		$(function() {
+			$('.timepicker').datetimepicker({
+				format: 'LT'
+			});
+		});
+	</script>
 </body>
 
 </html>
 <?php
-if (isset($_POST["savebtn"])) {
-    if (!empty($_POST['inputClinicStatus'])) {
-        $status = $_POST['inputClinicStatus'];
-    } else {
-        $status = "Not Approve";
-    }
-    $clinic_name = mysqli_real_escape_string($conn, $_POST["inputClinicName"]);
-    $contact = mysqli_real_escape_string($conn, $_POST["inputContact"]);
-    $fax = mysqli_real_escape_string($conn, $_POST["inputFax"]);
-    $email = mysqli_real_escape_string($conn, $_POST["inputEmailAddress"]);
-    $url = mysqli_real_escape_string($conn, $_POST["inputURL"]);
+$currentLink = $_SERVER["REQUEST_URI"];
 
-    $address = mysqli_real_escape_string($conn, $_POST["inputAddress"]) . ' ' . mysqli_real_escape_string($conn, $_POST["inputAddress2"]);
-    $city = mysqli_real_escape_string($conn, $_POST["inputCity"]);
+if (isset($_POST["uploadbtn"])) {
+	$targetDir = "../uploads/" . $clinic_row['clinic_id'] . "/clinic" . "/";
+	$allowTypes = array('jpg', 'png', 'jpeg');
 
-    if (!empty($_POST['inputState'])) {
-        $state = $_POST['inputState'];
-    } else {
-        $state = "";
-    }
-    $zipcode = mysqli_real_escape_string($conn, $_POST["inputZipCode"]);
+	$statusMsg = $errorMsg = $insertValuesSQL = $errorUpload = $errorUploadType = "";
+	if (!empty(array_filter($_FILES['inputImageUpload']['name']))) {
+		foreach ($_FILES['inputImageUpload']['name'] as $key => $value) {
+			// File upload path
+			$fileName = basename($_FILES['inputImageUpload']['name'][$key]);
+			$targetFilePath = $targetDir . $fileName;
 
-    $result = mysqli_query($conn,"SELECT * FROM patients WHERE patient_email = '.$email.'");
-    if (mysqli_num_rows($result) != 0) {
-        echo '<script>alert("Email Already Existed");</script>';
-        exit();
-    } else if (empty($clinic_name) && empty($contact) && empty($email) && empty($address)) {
-        echo '<script>alert("Cannot Be Empty");</script>';
-        exit();
-    } else {
-        try {
-            $sql = 'INSERT INTO clinics 
-                    (clinic_name, clinic_email, clinic_url, clinic_contact, clinic_fax, clinic_address, clinic_city, clinic_state, clinic_zipcode, clinic_status, date_created)
-                    VALUES ("'.$clinic_name.'", "'.$email.'", "'.$url.'", "'.$contact.'", "'.$fax.'", "'.$address.'", "'.$city.'", "'.$state.'", "'.$zipcode.'", "'.$status.'", "'.$date_created.'")';
-            mysqli_query($conn,$sql);
-            echo '<script>alert("New record created successfully");s</script>';
-            header("Location: clinic-add.php");
-        } catch (PDOException $e) {
-            echo $sql . "<br>" . $e->getMessage();
-        }
-        mysqli_close($conn);
-    }
-    ob_end_flush();
+			$folderpath = "../uploads/" . $clinic_row['clinic_id'] . "/clinic" . "/";
+			if (!file_exists($folderpath)) {
+				mkdir($folderpath, 0777, true);
+			}
+
+			// Check whether file type is valid
+			$fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+			if (in_array($fileType, $allowTypes)) {
+				// Upload file to server
+				if (move_uploaded_file($_FILES["inputImageUpload"]["tmp_name"][$key], $targetFilePath)) {
+					// Image db insert sql
+					$insertValuesSQL .= "('" . $fileName . "', '".$clinic_row['clinic_id']."'),";
+				} else {
+					$errorUpload .= $_FILES['inputImageUpload']['name'][$key] . ', ';
+				}
+			}
+		}
+
+		if (!empty($insertValuesSQL)) {
+			$insertValuesSQL = trim($insertValuesSQL, ',');
+			$insert = $conn->query("INSERT INTO clinic_images (clinicimg_filename, clinic_id) VALUES $insertValuesSQL");
+			if ($insert) {
+				$errorUpload = !empty($errorUpload) ? 'Upload Error: ' . $errorUpload : '';
+				$errorUploadType = !empty($errorUploadType) ? 'File Type Error: ' . $errorUploadType : '';
+				$errorMsg = !empty($errorUpload) ? '<br/>' . $errorUpload . '<br/>' . $errorUploadType : '<br/>' . $errorUploadType;
+				echo "<script>Swal.fire('Great!','Images are uploaded successfully!','success').then((result) => { if (result.value) { window.location.href = '".$currentLink."'; } });</script>";
+			} else {
+				echo "<script>Swal.fire('Oops...','there was an error uploading your file.','error')</script>";
+			}
+		}
+	} else {
+		echo "<script>Swal.fire('Oops...','Please upload a file.','error').then((result) => { if (result.value) { window.location.href = '".$currentLink."'; } });</script>";
+	}
 }
 ?>

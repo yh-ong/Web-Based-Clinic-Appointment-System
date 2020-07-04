@@ -3,6 +3,29 @@ include('../config/autoload.php');
 include('./includes/path.inc.php');
 include('./includes/session.inc.php');
 include('../helper/select_helper.php');
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $firstname  = $conn->real_escape_string($_POST['inputFirstName']);
+    $lastname   = $conn->real_escape_string($_POST['inputLastName']);
+    $ic         = $conn->real_escape_string($_POST['inputIC']);
+    $nationality = $conn->real_escape_string($_POST['inputNationality']);
+    $avatars     = $conn->real_escape_string($_POST['inputAvatar']);
+
+    if (!empty($_POST['inputGender'])) {
+        $gender = $_POST['inputGender'];
+    } else {
+        $gender = "";
+    }
+    $m_status   = $conn->real_escape_string($_POST['inputMaritalStatus']);
+    $dob        = $conn->real_escape_string($_POST['inputDOB']);
+    $age        = $conn->real_escape_string($_POST['inputAge']);
+    $email      = $conn->real_escape_string($_POST['inputEmailAddress']);
+    $contact    = $conn->real_escape_string($_POST['inputContactNumber']);
+    $address    = $conn->real_escape_string($_POST['inputAddress']) . ' ' . $conn->real_escape_string($_POST['inputAddress2']);
+    $city       = $conn->real_escape_string($_POST['inputCity']);
+    $state      = $conn->real_escape_string($_POST['inputState']);
+    $zipcode    = $conn->real_escape_string($_POST['inputZipCode']);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -52,12 +75,6 @@ include('../helper/select_helper.php');
                                 <!-- Add Patient -->
                                 <div class="form-row">
                                     <div class="form-group col-md-6">
-                                        <label for="inputPatientID">Patient ID #</label>
-                                        <input type="text" name="inputPatientID" class="form-control" id="inputPatientID" disabled>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group col-md-6">
                                         <label for="inputFirstName">First Name</label>
                                         <input type="text" name="inputFirstName" class="form-control" id="inputFirstName" placeholder="Enter First Name">
                                     </div>
@@ -86,7 +103,7 @@ include('../helper/select_helper.php');
                         <div class="card col-md-3">
                             <div class="card-body">
                                 <div class="imageupload">
-                                    <img src="./img/empty-avatar.jpg" id="output" class="img-fluid thumbnail" alt="Patient-Avatar" title="Patient-Avatar">
+                                    <img src="../assets/img/empty/empty-avatar.jpg" id="output" class="img-fluid thumbnail" alt="Patient-Avatar" title="Patient-Avatar">
                                     <div class="file-tab">
                                         <label class="btn btn-sm btn-primary btn-block btn-file">
                                             <span>Browse</span>
@@ -246,41 +263,58 @@ include('../helper/select_helper.php');
 </html>
 <?php
 if (isset($_POST['savebtn'])) {
-    $firstname  = $conn->real_escape_string($_POST['inputFirstName']);
-    $lastname   = $conn->real_escape_string($_POST['inputLastName']);
-    $ic         = $conn->real_escape_string($_POST['inputIC']);
-    $nationality = $conn->real_escape_string($_POST['inputNationality']);
-    $avatars     = $conn->real_escape_string($_POST['inputAvatar']);
 
-    if (!empty($_POST['inputGender'])) {
-        $gender = $_POST['inputGender'];
-    } else {
-        $gender = "";
-    }
-    $m_status   = $conn->real_escape_string($_POST['inputMaritalStatus']);
-    $dob        = $conn->real_escape_string($_POST['inputDOB']);
-    $age        = $conn->real_escape_string($_POST['inputAge']);
-    $email      = $conn->real_escape_string($_POST['inputEmailAddress']);
-    $contact    = $conn->real_escape_string($_POST['inputContactNumber']);
-    $address    = $conn->real_escape_string($_POST['inputAddress']) . ' ' . $conn->real_escape_string($_POST['inputAddress2']);
-    $city       = $conn->real_escape_string($_POST['inputCity']);
-    $state      = $conn->real_escape_string($_POST['inputState']);
-    $zipcode    = $conn->real_escape_string($_POST['inputZipCode']);
-
-    if (empty($fullname) && empty($ic) && empty($nationality) && empty($avatar)) {
-        echo "<script>Swal.fire('Oops...', 'Field Cannot Be Empty!', 'error');</script>";
+    if (empty($fullname) && empty($ic) && empty($nationality)) {
+        echo '<script>
+                Swal.fire({ title: "Oops...", text: "Firstname, Lastname, IC, Nationality Field Cannot Be Empty!", type: "error" }).then((result) => {
+                    if (result.value) { window.location.href = "patient-add.php"; }
+                })
+                </script>';
     } else {
         // Check Email
         $result = mysqli_query($conn, "SELECT * FROM patients WHERE patient_email = '.$email.'");
         if (mysqli_num_rows($result) != 0) {
             echo "<script>Swal.fire('Oops...', 'Email Already Existed!', 'error');</script>";
         } else {
-            $query = 'INSERT INTO patients 
+            if ($_FILES["inputAvatar"]["name"] != "") {
+                if (isset($_FILES["inputAvatar"]["name"])) {
+                    $allowed =  array('gif', 'png', 'jpg');
+                    $filename = $_FILES['inputAvatar']['name'];
+                    $ext = pathinfo($filename, PATHINFO_EXTENSION);
+                    if (!in_array($ext, $allowed)) {
+                        echo "<script>Swal.fire('Oops...','Only can be image!','error')</script>";
+                        exit();
+                    } else {
+                        if (!empty($_FILES['inputAvatar']['name'])) {
+                            $folderpath = "../uploads/" . $clinic_row['clinic_id'] . "/doctor" . "/";
+                            $path = "../uploads/" . $clinic_row['clinic_id'] . "/doctor" . "/" . $_FILES['inputAvatar']['name'];
+                            $image = $_FILES['inputAvatar']['name'];
+        
+                            if (!file_exists($folderpath)) {
+                                mkdir($folderpath, 0777, true);
+                                move_uploaded_file($_FILES['inputAvatar']['tmp_name'], $path);
+                            } else {
+                                move_uploaded_file($_FILES['inputAvatar']['tmp_name'], $path);
+                            }
+                        } else {
+                            echo "<script>Swal.fire('Oops...','You should select a file to upload!','error')</script>";
+                            exit();
+                        }
+                    }
+                }
+                $query = 'INSERT INTO patients 
+                (patient_avatar, patient_name, patient_identity, patient_nationality, patient_gender, patient_maritalstatus, patient_dob, patient_age, patient_email, patient_contact, patient_address, patient_city, patient_state, patient_zipcode, date_created)
+                VALUES ("'.$avatar.'", "'.$fullname.'", "'.$ic.'", "'.$nationality.'", "'.$gender.'", "'.$m_status.'", "'.$dob.'", "'.$age.'", "'.$email.'", "'.$contact.'", "'.$address.'", "'.$city.'", "'.$state.'", "'.$zipcode.'", "'.$date_created.'")';
+            } else {
+                $query = 'INSERT INTO patients 
                 (patient_name, patient_identity, patient_nationality, patient_gender, patient_maritalstatus, patient_dob, patient_age, patient_email, patient_contact, patient_address, patient_city, patient_state, patient_zipcode, date_created)
                 VALUES ("'.$fullname.'", "'.$ic.'", "'.$nationality.'", "'.$gender.'", "'.$m_status.'", "'.$dob.'", "'.$age.'", "'.$email.'", "'.$contact.'", "'.$address.'", "'.$city.'", "'.$state.'", "'.$zipcode.'", "'.$date_created.'")';
+            }
+
+            
             if (mysqli_query($conn, $query)) {
                 echo '<script>
-                        Swal.fire({ "Great!", "New Record Added!", "success" }).then((result) => {
+                        Swal.fire({ title: "Great!", text: "New Record Added!", type: "success" }).then((result) => {
                             if (result.value) { window.location.href = "patient-add.php"; }
                         })
                         </script>';

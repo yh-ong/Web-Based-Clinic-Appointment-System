@@ -19,6 +19,5 @@ RewriteCond %{REQUEST_FILENAME}\.php !-f
 
 
 # Error Page ！important
-ErrorDocument 404 http://localhost/app/admin/layouts/404.php
-
+ErrorDocument 404 http://localhost/doclab/admin/layouts/404.php
 </IfModule>

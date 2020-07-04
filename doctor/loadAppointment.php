@@ -27,12 +27,25 @@ while ($trow = $tlist->fetch_assoc()) {
 		<tr>
 			<td><?= $trow['patient_lastname'] . ' ' . $trow['patient_firstname'] ?></td>
 			<td><?= $trow['app_time'] ?></td>
-			<td><?= $trow['app_date'] ?></td>
 			<td><?= $trow['treatment_type'] ?></td>
+			<?php
+				if ($trow['consult_status'] == 1) {
+					echo '<td><span class="badge badge-success px-3 py-1">Complete</span></td>';
+				} else {
+					echo '<td><span class="badge badge-warning px-3 py-1">Not Complete</span></td>';
+				}
+			?>
+			<?php
+				if ($trow['arrive_status'] == 1) {
+					echo '<td><span class="badge badge-success px-3 py-1">Arrived</span></td>';
+				} else {
+					echo '<td><span class="badge badge-warning px-3 py-1">On the way</span></td>';
+				}
+			?>
 			<?php
 				if ($trow['status'] == 1) {
 					echo '<td><span class="badge badge-success px-3 py-1">Confirmed</span></td>';
-					echo '<td><a href="patient-view.php?id=' . $trow['patient_id'] . '" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i>View</a></td>';
+					echo '<td><a href="appointment-view.php?id=' . encrypt_url($trow['app_id']) . '" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i>View</a></td>';
 				} else {
 					echo '<td><span class="badge badge-warning px-3 py-1">Pending</span></td>';
 					echo '<td></td>';

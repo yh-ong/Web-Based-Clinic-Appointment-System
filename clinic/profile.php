@@ -23,11 +23,12 @@ include('../helper/select_helper.php');
 
             <div class="col-12">
                 <div class="owl-carousel">
-                    <div class="item"><img src="../uploads/clinicimg/clinicimg1.jpg"></div>
-                    <div class="item"><img src="../uploads/clinicimg/clinicimg2.jpg"></div>
-                    <div class="item"><img src="../uploads/clinicimg/clinicimg3.jpg"></div>
-                    <div class="item"><img src="../uploads/clinicimg/clinicimg4.jpg"></div>
-                    <div class="item"><img src="../uploads/clinicimg/clinicimg5.jpg"></div>
+                    <?php    
+                        $img_result = mysqli_query($conn,"SELECT * FROM clinic_images WHERE clinic_id = ".$clinic_row["clinic_id"]." ");
+                        while($img_row = mysqli_fetch_assoc($img_result)) {
+                            echo '<div class="item"><img src="../uploads/'.$clinic_row["clinic_id"].'/clinic/'.$img_row["clinicimg_filename"].'"></div>';
+                        }
+                    ?>
                 </div>
             </div>
 
@@ -47,12 +48,30 @@ include('../helper/select_helper.php');
                         $hour_result = mysqli_query($conn,"SELECT * FROM business_hour WHERE clinic_id = ".$clinic_row["clinic_id"]." ");
                         while ($hour_row = mysqli_fetch_assoc($hour_result)) {
                             ?>
-                            <p class="col-xs-2"><span class="badge badge-info px-3 py-1"><?=$hour_row["day"]?></span></p>
+                            <p class="col-xs-2"><span class="badge badge-info px-3 py-1">Monday - Friday</span></p>
                             <p class="col-xs-8">
-                                <?php if($hour_row["open"] == "" && $hour_row["close"] == "") {
+                                <?php if($hour_row["open_week"] == "" && $hour_row["close_week"] == "") {
                                     echo "Closed";
                                 } else {
-                                    echo $hour_row['open'].' -- '.$hour_row['close'];
+                                    echo $hour_row['open_week'].' -- '.$hour_row['close_week'];
+                                }
+                                ?>
+                            </p>
+                            <p class="col-xs-2"><span class="badge badge-info px-3 py-1">Saturday</span></p>
+                            <p class="col-xs-8">
+                                <?php if($hour_row["open_sat"] == "" && $hour_row["close_sat"] == "") {
+                                    echo "Closed";
+                                } else {
+                                    echo $hour_row['open_sat'].' -- '.$hour_row['close_sat'];
+                                }
+                                ?>
+                            </p>
+                            <p class="col-xs-2"><span class="badge badge-info px-3 py-1">Sunday</span></p>
+                            <p class="col-xs-8">
+                                <?php if($hour_row["open_sun"] == "" && $hour_row["close_sun"] == "") {
+                                    echo "Closed";
+                                } else {
+                                    echo $hour_row['open_sun'].' -- '.$hour_row['close_sun'];
                                 }
                                 ?>
                             </p>
@@ -66,8 +85,8 @@ include('../helper/select_helper.php');
             <div class="col-6">
                 <div class="card">
                     <div class="card-body">
-                        <p class="mb-2"><i class="fas fa-map-marker-alt fa-fw"></i> <?php echo $clinic_row["clinic_address"].' '.$clinic_row["clinic_city"].' '.$clinic_row["clinic_state"].' '.$clinic_row["clinic_zipcode"] ?></p>
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d8149819.804819931!2d109.61814849999999!3d4.1406339999999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2smy!4v1569765236872!5m2!1sen!2smy" width="100%" height="320" frameborder="0" style="border:0;" allowfullscreen=""></iframe>
+                        <p class="mb-2"><i class="fas fa-map-marker-alt fa-fw"></i> <?php echo $clinic_row["clinic_address"].', '.$clinic_row["clinic_state"].', '.$clinic_row["clinic_zipcode"].', '.$clinic_row["clinic_city"] ?></p>
+                        <iframe width='100%' height='300' frameborder='0' style='border:0' src='https://www.google.com/maps/embed/v1/place?key=AIzaSyAGx-OjyNn10KsJ_OsE7cl2_qxg6mNBZyI&q="<?= $clinic_row['clinic_address'] ?>+","+<?= $clinic_row['clinic_city'] ?>+","+<?= $clinic_row['clinic_state'] ?>+","+<?= $clinic_row['clinic_zipcode'] ?>+"+Malaysia' allowfullscreen></iframe>
                     </div>
                 </div>
             </div>

@@ -1,19 +1,18 @@
 <?php
-require_once("includes/dbconnection.php");
-
-include("includes/session.php");
-include("includes/config.php");
+include("../config/autoload.php");
+include("includes/path.inc.php");
+include("includes/session.inc.php");
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <?php include 'includes/styles.php';?>
+    <?php include CSS_PATH;?>
 </head>
 
 <body>
-    <?php include 'includes/navigate.php'; ?>
+    <?php include NAVIGATION; ?>
     <div class="page-content" id="content">
-        <?php include 'includes/header.php';?>
+        <?php include HEADER;?>
         <!-- Page content -->
         <div class="row">
             <div class="col-12">
@@ -21,56 +20,52 @@ include("includes/config.php");
                     <div class="card-body">
                         <!-- Datatable -->
                         <div class="data-tables">
-                            <table id="datatable" class="table table-striped table-bordered" style="width:100%">
+                            <?php
+                            function headerTable()
+                            {
+                                $header = array("Patient", "Date", "Time", "Provider", "Clinic", "Treatment", "Status");
+                                for ($i = 0; $i < count($header); $i++) {
+                                    echo "<th>" . $header[$i] . "</th>" . PHP_EOL;
+                                }
+                            }
+                            ?>
+                            <table id="datatable" class="table" style="width:100%">
                                 <thead>
                                     <tr>
-                                        <th>Patient</th>
-                                        <th>Time</th>
-                                        <th>Provider</th>
-                                        <th>Type</th>
-                                        <th>Confirmation</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
+                                        <?= headerTable(); ?>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>Unity Butler</td>
-                                        <td>9:00 AM</td>
-                                        <td>San Francisco</td>
-                                        <td>Follow Up Visit</td>
-                                        <td><span class="badge badge-pill badge-success mr-1">&#10004;</span>Confirmed</td>
-                                        <td>2009/12/09</td>
-                                        <td><button type="button" class="btn btn-sm btn-primary"><i class="fa fa-eye"></i> View</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Howard Hatfield</td>
-                                        <td>10:00 AM</td>
-                                        <td>San Francisco</td>
-                                        <td>New Patient</td>
-                                        <td><span class="badge badge-pill badge-warning mr-1">&#33;</span>Not Confirmed</td>
-                                        <td>2008/12/16</td>
-                                        <td><button type="button" class="btn btn-sm btn-primary"><i class="fa fa-eye"></i> View</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Hope Fuentes</td>
-                                        <td>12:00 PM</td>
-                                        <td>San Francisco</td>
-                                        <td>Sick Visit</td>
-                                        <td><span class="badge badge-pill badge-success mr-1">&#10004;</span>Confirmed</td>
-                                        <td>2010/02/12</td>
-                                        <td><button type="button" class="btn btn-sm btn-primary"><i class="fa fa-eye"></i> View</button></td>
-                                    </tr>
+                                    <?php
+                                    $result = mysqli_query($conn, "SELECT * FROM appointment a JOIN patients p ON a.patient_id = p.patient_id JOIN clinics c ON a.clinic_id = c.clinic_id JOIN doctors d ON a.doctor_id = d.doctor_id ");
+                                    while($row = mysqli_fetch_assoc($result)) {
+                                        if ($result->num_rows == 0) {
+                                            echo '<p>No result</p>';
+                                        } else {
+                                            ?>
+                                            <tr>
+                                                <td><?= $row["patient_lastname"].' '.$row["patient_firstname"] ?></td>
+                                                <td><?= $row["app_date"] ?></td>
+                                                <td><?= $row["app_time"] ?></td>
+                                                <td>Dr. <?= $row["doctor_lastname"].' '.$row["doctor_firstname"] ?></td>
+                                                <td><?= $row["clinic_name"] ?></td>
+                                                <td><?= $row["treatment_type"] ?></td>
+                                                <?php
+                                                    if ($row['status'] == 1) {
+                                                        echo '<td><span class="badge badge-success px-3 py-1">Confirmed</span></td>';
+                                                    } else {
+                                                        echo '<td><span class="badge badge-warning px-3 py-1">Pending</span></td>';
+                                                    }
+                                                ?>
+                                            </tr>
+                                            <?php
+                                            }
+                                        }
+                                            ?>
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <th>Patient</th>
-                                        <th>Time</th>
-                                        <th>Provider</th>
-                                        <th>Type</th>
-                                        <th>Status</th>
-                                        <th>Confirmation</th>
-                                        <th>Action</th>
+                                        <?= headerTable(); ?>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -83,6 +78,6 @@ include("includes/config.php");
         </div>
         <!-- End Page Content -->
     </div>
-    <?php include 'includes/footer.php'; ?>
+    <?php include JS_PATH; ?>
 </body>
 </html>

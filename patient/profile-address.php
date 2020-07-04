@@ -10,10 +10,13 @@ if(isset($_POST['inputID'])) {
 	$city = mysqli_escape_string($conn,$_POST['inputCity']);
 	$state = mysqli_escape_string($conn,$_POST['inputState']);
 	$zipcode = mysqli_escape_string($conn,$_POST['inputZipcode']);
+	$country = mysqli_escape_string($conn,$_POST['inputCountry']);
 
-	$query = "UPDATE patients SET patient_address = '".$address."', patient_city = '".$city."', patient_state = '".$state."', patient_zipcode = '".$zipcode."' WHERE patient_id = '".$id."' ";
+	// $query = "UPDATE patients SET patient_address = '".$address."', patient_city = '".$city."', patient_state = '".$state."', patient_zipcode = '".$zipcode."' WHERE patient_id = '".$id."' ";
+	$stmt = $conn->prepare("UPDATE patients SET patient_address = ?, patient_city = ?, patient_state = ?, patient_zipcode = ?, patient_country = ? WHERE patient_id = ? ");
+	$stmt->bind_param("ssssss", $address, $city, $state, $zipcode, $country, $id);
 
-	if (mysqli_query($conn, $query)) {
+	if ($stmt->execute()) {
 		$result2 = $conn->query("SELECT * FROM patients WHERE patient_id = '".$id."' ");
 		$numrows = mysqli_num_rows($result2);
 

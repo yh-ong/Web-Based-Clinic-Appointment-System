@@ -7,7 +7,7 @@ header("Content-Type: application/json; charset=UTF-8");
 include("../config/database.php");
 
 // $query = "SELECT * FROM clinics, clinic_images, doctors WHERE clinic_images.clinic_id = clinics.clinic_id AND clinics.clinic_id = doctors.clinic_id ";
-$query = "SELECT * FROM clinics INNER JOIN clinic_images ON clinic_images.clinic_id = clinics.clinic_id ";
+$query = "SELECT * FROM clinics WHERE clinic_status = 1";
 
 $result = mysqli_query($conn, $query);
 

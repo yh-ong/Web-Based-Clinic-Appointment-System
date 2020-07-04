@@ -6,7 +6,7 @@
                     <div class="widget-titles">
                         <h6>Total Patients</h6>
                     </div>
-                    <span class="widget-numbers">2,356</span>
+                    <span class="widget-numbers"><?=$pt_row?></span>
                 </div>
                 <div class="widget-icons bg-blue">
                     <div class="c-blue">
@@ -33,7 +33,7 @@
                     <div class="widget-titles">
                         <h6>Total Appointment</h6>
                     </div>
-                    <span class="widget-numbers">924</span>
+                    <span class="widget-numbers"><?=$app_row?></span>
                 </div>
                 <div class="widget-icons bg-red">
                     <div class="c-red">
@@ -57,7 +57,7 @@
                     <div class="widget-titles">
                         <h6>Total Doctors</h6>
                     </div>
-                    <span class="widget-numbers">3</span>
+                    <span class="widget-numbers"><?=$tr_row?></span>
                 </div>
                 <div class="widget-icons bg-oren">
                     <div class="c-oren">

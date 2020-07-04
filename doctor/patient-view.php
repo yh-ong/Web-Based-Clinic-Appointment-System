@@ -3,7 +3,7 @@ include('../config/autoload.php');
 include('./includes/path.inc.php');
 include('./includes/session.inc.php');
 
-$patient_id = $_GET["id"];
+$patient_id = decrypt_url($_GET["id"]);
 $result = $conn->query("SELECT * FROM patients WHERE patient_id = $patient_id");
 $row = $result->fetch_assoc();
 
@@ -13,7 +13,7 @@ $medresult = $conn->query(
 	"SELECT * FROM medical_record M 
 	INNER JOIN clinics C ON M.clinic_id = C.clinic_id
 	INNER JOIN patients P ON M.patient_id = P.patient_id
-	WHERE M.patient_id = $patient_id"
+	WHERE M.patient_id = $patient_id ORDER BY M.med_id DESC"
 );
 $medrow = $medresult->fetch_assoc();
 
@@ -44,12 +44,73 @@ if (isset($_POST['prescriptionbtn'])) {
 		header('Location: '.$_SERVER['REQUEST_URI']);
 	}
 }
+
+$apperrors = array();
+
+if (isset($_POST['appointmentbtn'])) {
+	$date = escape_input($_POST['inputAppointmentDate']);
+	$time = escape_input($_POST['inputAppointmentTime']);
+	$treatment = escape_input($_POST['inputTreatment']);
+
+	if (empty($date)) {
+		array_push($apperrors, "Dates is required");
+	}
+
+	if (empty($time)) {
+		array_push($apperrors, "Time is required");
+	}
+
+	if (empty($treatment)) {
+		array_push($apperrors, "Treatment is required");
+	}
+
+	if (count($apperrors) == 0) {
+		$appstmt = $conn->prepare("INSERT INTO appointment (app_date, app_time, treatment_type, patient_id, clinic_id, doctor_id) VALUE (?,?,?,?,?,?) ");
+		$appstmt->bind_param("ssssss", $date, $time, $treatment, $patient_id, $doctor_row['clinic_id'], $doctor_row['doctor_id']);
+		$appstmt->execute();
+		$appstmt->close();
+		header('Location: '.$_SERVER['REQUEST_URI']);
+	}
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
 	<?php include CSS_PATH; ?>
+	<script type="text/javascript">
+		$(function() {
+			$('#datepicker').datetimepicker({
+				inline: true,
+				minDate: '<?= $current_date ?>',
+				format: 'YYY-MM-DD',
+			});
+		}).on('dp.change', function(event) {
+			var formatted = event.date.format('YYYY-MM-DD');
+			loadData(formatted);
+			$("#inputAppointmentDate").val(formatted);
+		});
+
+		function loadData(formatted) {
+			$.ajax({
+				type: "POST",
+				data: {
+					date: formatted
+				},
+				url: 'loadSchedule.php',
+				dateType: "html",
+				success: function(response) {
+					$("#responsecontainer").html(response);
+				}
+			});
+		}
+
+		function getTime(time) {
+			$("#inputAppointmentTime").val(time);
+			$("#labelAppointmentTime").html(time);
+		}
+		// $('#followup').modal('show');
+	</script>
 </head>
 
 <style>
@@ -89,34 +150,49 @@ if (isset($_POST['prescriptionbtn'])) {
 									<span aria-hidden="true">&times;</span>
 								</button>
 							</div>
-							<div class="modal-body">
-								<div class="form-group">
-									<label>Treatment Type</label>
-									<select name="inputTreatment" id="inputTreatment" class="form-control">
-										<?php
-											$treatresult = mysqli_query($conn, "SELECT * FROM treatment_type WHERE doctor_id = '" . $doctor_row['doctor_id'] . "'");
-											while($treatrow = mysqli_fetch_assoc($treatresult)) {
-												echo '<option value='.$treatrow['treatment_name'].'>'.$treatrow['treatment_name'].'</option>';
-											}
-										?>
-									</select>
-								</div>
-								<div class="form-row">
-									<div class="form-group col-md-6">
-										<label>Select Date</label>
-										<div id="datepicker" onclick="getDate()"></div>
+							<form action="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>" method="POST">
+								<?php
+									if (count($apperrors) > 0) {
+										echo '<div class="alert alert-warning" role="alert">';
+										foreach ($apperrors as $err) {
+											echo $err . '<br>';
+										}
+										echo '</div>';
+									}
+								?>
+								<div class="modal-body">
+									<div class="form-group">
+										<label>Treatment Type</label>
+										<select name="inputTreatment" id="inputTreatment" class="form-control">
+											<?php
+												$treatresult = mysqli_query($conn, "SELECT * FROM treatment_type WHERE doctor_id = '" . $doctor_row['doctor_id'] . "'");
+												while($treatrow = mysqli_fetch_assoc($treatresult)) {
+													echo '<option value='.$treatrow['treatment_name'].'>'.$treatrow['treatment_name'].'</option>';
+												}
+											?>
+										</select>
 									</div>
 									<div class="form-group">
-										<label>Select Time</label>
-										<div id="responsecontainer">
+										<input type="hidden" class="form-control form-control-sm" name="inputAppointmentDate" id="inputAppointmentDate">
+										<input type="hidden" class="form-control form-control-sm" name="inputAppointmentTime" id="inputAppointmentTime">
+									</div>
+									<div class="form-row">
+										<div class="form-group col-md-6">
+											<label>Select Date</label>
+											<div id="datepicker" onclick="getDate()"></div>
+										</div>
+										<div class="form-group">
+											<label>Select Time : <small id="labelAppointmentTime"></small></label>
+											<div id="responsecontainer">
+											</div>
 										</div>
 									</div>
 								</div>
-							</div>
-							<div class="modal-footer">
-								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-								<button type="submit" name="appointmentbtn" class="btn btn-primary">Save</button>
-							</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+									<button type="submit" name="appointmentbtn" class="btn btn-primary">Save</button>
+								</div>
+							</form>
 						</div>
 					</div>
 				</div>
@@ -156,6 +232,28 @@ if (isset($_POST['prescriptionbtn'])) {
 				</div>
 			</div>
 
+			<div class="modal fade" id="complete" tabindex="-1" role="dialog" aria-hidden="true">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header" style="border:none;">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<form action="<?= htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST">
+							<div class="modal-body">
+								<input type="hidden" name="treatmentID" value="<?= $patient_id ?>">
+								Case Complete for <b><?= $row["patient_lastname"].' '.$row["patient_firstname"] ?></b>
+							</div>
+							<div class="modal-footer" style="border:none;">
+								<button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+								<button type="submit" name="completebtn" class="btn btn-sm btn-success px-3">Yes</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+
 			<div class="col-md-12">
 				<!-- Card Content -->
 				<div class="card patient-status-bar">
@@ -183,7 +281,7 @@ if (isset($_POST['prescriptionbtn'])) {
 									<?php if ($medresult->num_rows == 0) {
 										echo 'New Patient';
 									} else {
-										echo $medrow['med_sympton'];
+										echo $medrow['med_diagnosis'];
 									}
 									?>
 								</h5>
@@ -197,7 +295,6 @@ if (isset($_POST['prescriptionbtn'])) {
 				<nav class="navbar px-0 mb-3">
 					<div class="nav nav-pills mr-auto">
 						<a class="nav-item text-sm-center nav-link active" data-toggle="pill" href="#tab1">Prescription Info</a>
-						<a class="nav-item text-sm-center nav-link" data-toggle="pill" href="#tab2">Medical Info</a>
 						<a class="nav-item text-sm-center nav-link" data-toggle="pill" href="#tab3">Appointment Record</a>
 					</div>
 					<div class=" nav nav-pills ml-auto">
@@ -277,34 +374,6 @@ if (isset($_POST['prescriptionbtn'])) {
 						</div>
 					</div>
 
-					<div class="tab-pane fade" id="tab2" role="tabpanel" aria-labelledby="tab2">
-						<div class="row">
-							<div class="col-md-12">
-								<h6>Latest Status</h6>
-								<div class="card">
-									<div class="card-body">
-										<ul class="list-unstyled">
-											<li class="media">
-												<div class="media-body">
-													<div><small class="text-muted">2019-08-12</small></div>
-													<h5 class="mt-0 mb-1">Visit at YH Clinic Centre</h5>
-													Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-												</div>
-												</p>
-											<li class="media my-4">
-												<div class="media-body">
-													<div><small class="text-muted">2019-05-27</small></div>
-													<h5 class="mt-0 mb-1">illness</h5>
-													Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-												</div>
-											</li>
-										</ul>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
 					<div class="tab-pane fade" id="tab3" role="tabpanel" aria-labelledby="tab3">
 						<div class="card">
 							<div class="card-body">
@@ -343,35 +412,6 @@ if (isset($_POST['prescriptionbtn'])) {
 	</div>
 
 	<?php include JS_PATH; ?>
-	<script type="text/javascript">
-		$(function() {
-			$('#datepicker').datetimepicker({
-				inline: true,
-				minDate: '<?= $current_date ?>',
-				format: 'YYY-MM-DD',
-			});
-		}).on('dp.change', function(event) {
-			var formatted = event.date.format('YYYY-MM-DD');
-			loadData(formatted);
-		});
-
-		function loadData(formatted) {
-			$.ajax({
-				type: "POST",
-				data: {
-					date: formatted
-				},
-				url: 'loadSchedule.php',
-				dateType: "html",
-				success: function(response) {
-					$("#responsecontainer").html(response);
-				}
-			});
-		}
-
-
-		$('#followup').modal('show');
-	</script>
 </body>
 
 </html>

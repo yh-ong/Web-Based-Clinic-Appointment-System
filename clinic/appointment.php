@@ -16,7 +16,14 @@ require_once('./includes/session.inc.php');
         <?php include HEADER; ?>
         <!-- Page content -->
         <div class="row">
-            <div class="col-12">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="datepicker"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
                 <div class="card">
                     <div class="card-body">
                         <!-- Datatable -->
@@ -37,40 +44,12 @@ require_once('./includes/session.inc.php');
                                         <?php headerTable(); ?>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <?php
-                                    $tlist = $conn->query(
-                                        "SELECT * FROM appointment 
-                                         JOIN patients ON appointment.patient_id = patients.patient_id 
-                                         JOIN clinics ON appointment.clinic_id = clinics.clinic_id 
-                                         JOIN doctors ON appointment.doctor_id = doctors.doctor_id 
-                                         WHERE appointment.clinic_id = " . $clinic_row['clinic_id'] . "
-                                        ");
-                                    while ($trow = $tlist->fetch_assoc()) :
-                                        ?>
-                                        <tr>
-                                            <td><?= $trow['app_id'] ?></td>
-                                            <td><?= $trow['patient_lastname'] . ' ' . $trow['patient_firstname'] ?></td>
-                                            <td><?= $trow['app_date'] ?></td>
-                                            <td><?= $trow['app_time'] ?></td>
-                                            <td><?= $trow['treatment_type'] ?></td>
-                                            <td><?php
-                                                if ($trow['status'] == 1) {
-                                                    echo '<span class="badge badge-success px-3 py-1">Confirmed</span>';
-                                                } else {
-                                                    echo '<span class="badge badge-warning px-3 py-1">Pending</span>';
-                                                }
-                                                ?>
-                                            </td>
-                                            <td><button type="button" name="checkbtn" class="btn btn-sm btn-primary"><i class="fas fa-plane-arrival mr-3"></i>Arrive</button></td>
-                                        </tr>
-                                    <?php endwhile; ?>
-                                </tbody>
-                                <tfoot>
+                                <tbody id="responsecontainer"></tbody>
+                                <!-- <tfoot>
                                     <tr>
                                         <?php headerTable(); ?>
                                     </tr>
-                                </tfoot>
+                                </tfoot> -->
                             </table>
                         </div>
                         <!-- End Datatable -->
@@ -88,6 +67,52 @@ require_once('./includes/session.inc.php');
                 $(this).html('<i class="fas fa-plane-arrival mr-3"></i>Arrive');
             });
         });
+    </script>
+    <script type="text/javascript">
+		$(function() {
+			$('#datepicker').datetimepicker({
+				inline: true,
+				minDate: '<?= $current_date ?>',
+				format: 'YYY-MM-DD',
+			});
+		}).on('dp.change', function(event) {
+			var formatted = event.date.format('YYYY-MM-DD');
+			loadData(formatted,  <?= $clinic_row['clinic_id'] ?>);
+		});
+
+		function loadData(formatted, id) {
+			$.ajax({
+				type: "POST",
+				data: {
+					date: formatted,
+					id: id,
+				},
+				url: 'loadAppointment.php',
+				dateType: "html",
+				success: function(response) {
+					$("#responsecontainer").html(response);
+				}
+			});
+		}
+    </script>
+    <script>
+        function updateId(id)
+        {
+            $.ajax({
+                type: "POST",
+                data: {
+                    id: id
+                },
+                url: 'updateArrive.php',
+                success: function(data) {
+                    console.log(data);
+                    location.reload();
+                },
+                error: function(data) {
+                    console.log(data);
+                }
+            });
+        }
     </script>
 </body>
 

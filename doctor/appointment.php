@@ -34,7 +34,7 @@ include('./includes/session.inc.php');
 						<?php
 						function headerTable()
 						{
-							$header = array("Name", "Time", "Date",  "Treatment", "Status", "Action");
+							$header = array("Name", "Time",  "Treatment", "Case","Arrive", "Status", "Action");
 							for ($i = 0; $i < count($header); $i++) {
 								echo "<th>" . $header[$i] . "</th>" . PHP_EOL;
 							}

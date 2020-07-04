@@ -28,7 +28,7 @@
                     <a href="#" class="nav-link has-arrow" aria-expanded="false"><i class="fa fa-user-clock mr-3 fa-fw"></i>Schedule</a>
                     <ul class="side-collapse">
                         <a href="sch-list.php" class="nav-link"><i class="far fa-calendar mr-3 fa-fw"></i>Manage Schedule</a>
-                        <a href="schedule-setup.php" class="nav-link"><i class="far fa-calendar-plus mr-3 fa-fw"></i>Schedule Setup</a>
+                        <!-- <a href="schedule-setup.php" class="nav-link"><i class="far fa-calendar-plus mr-3 fa-fw"></i>Schedule Setup</a> -->
                         <!-- <a href="schedule.php" class="nav-link"><i class="far fa-calendar-alt mr-3 fa-fw"></i>View Schedule</a> -->
                     </ul>
                 </li>

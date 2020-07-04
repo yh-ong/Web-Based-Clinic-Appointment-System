@@ -1,33 +1,44 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
-// header("Access-Control-Allow-Credentials: true");
-// header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 
 include("../config/database.php");
+include("../config/security.php");
 
-// $contentdata = file_get_contents("php://input");
-// $getdata = json_decode($contentdata);
+if (isset($_POST['inputemail']) && isset($_POST['inputpass'])) {
+	$email = mysqli_escape_string($conn, $_POST['inputemail']);
+	$pass = mysqli_escape_string($conn, $_POST['inputpass']);
 
-// $email = $getdata->inputemail;
-// $pass = $getdata->inputpass;
+	$check = $conn->prepare("SELECT * FROM patients WHERE patient_email = ? ");
+    $check->bind_param("s", $email);
+    $check->execute();
+    $q = $check->get_result();
+    $r = $q->fetch_assoc();
+    if (mysqli_num_rows($q) != 1) {
+		echo json_encode(array("0"), JSON_FORCE_OBJECT);
+	} else {
+        $token = $r["patient_token"];
+        $inputPassword = $conn->real_escape_string(md5($_POST['inputpass']));
+		$enpass = encrypt($inputPassword, $token);
 
-$email = $_POST['inputemail'];
-$pass = $_POST['inputpass'];
+		$checkstmt = $conn->prepare("SELECT * FROM patients WHERE patient_email = ? AND patient_password = ?");
+		$checkstmt->bind_param("ss", $email, $enpass);
+		$checkstmt->execute();
+		$checkresult = $checkstmt->get_result();
+			
+		if ($checkresult->num_rows > 0) {
+			$arr = array();
+			while($row = $checkresult->fetch_assoc()) {
+				$arr[] = $row;
+			}
 
-$query = "SELECT * FROM patients WHERE patient_email = '$email' AND patient_password = '$pass' ";
-$result = mysqli_query($conn, $query);
-
-$numrow = mysqli_num_rows($result);
-
-if($numrow == 1) {
-	$arr = array();
-	while($row = mysqli_fetch_assoc($result)) {
-		$arr[] = $row;
+			echo json_encode($arr);
+			mysqli_close($conn);
+		} else {
+			echo json_encode(array("0"), JSON_FORCE_OBJECT);
+		}
 	}
 
-	echo json_encode($arr);
-	mysqli_close($conn);
 } else {
-	echo json_encode(null);
+	echo 'No Data Post';
 }

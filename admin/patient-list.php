@@ -1,21 +1,20 @@
 <?php
-require_once("includes/dbconnection.php");
-
-include("includes/session.php");
-include("includes/config.php");
+require_once("../config/autoload.php");
+include("includes/session.inc.php");
+include("includes/path.inc.php");
 
 $sql = "SELECT * FROM clinics WHERE clinic_id = ?";
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <?php include 'includes/styles.php';?>
+    <?php include CSS_PATH;?>
 </head>
 
 <body>
-    <?php include 'includes/navigate.php'; ?>
+    <?php include NAVIGATION; ?>
     <div class="page-content" id="content">
-        <?php include 'includes/header.php';?>
+        <?php include HEADER;?>
         <!-- Page content -->
         <div class="row">
             <div class="col-12">
@@ -25,7 +24,7 @@ $sql = "SELECT * FROM clinics WHERE clinic_id = ?";
                         <div class="card-inner">
                             <!-- Datatable -->
                             <div class="data-tables">
-                                <table id="datatable" class="table table-striped table-bordered" style="width:100%">
+                                <table id="datatable" class="table" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th>Patient ID #</th>
@@ -47,7 +46,7 @@ $sql = "SELECT * FROM clinics WHERE clinic_id = ?";
                                             <td><?php echo $table_row["patient_dob"];?></td>
                                             <td><?php echo $table_row["patient_contact"];?></td>
                                             <td><?php echo $table_row["date_created"];?></td>
-                                            <td><a href="patient-view.php?pid=<?php echo $table_row["patient_id"];?>" class="btn btn-sm btn-primary"><i class="fa fa-eye"></i> View</a></td>
+                                            <td><a href="patient-view.php?pid=<?php echo encrypt_url($table_row["patient_id"]);?>" class="btn btn-sm btn-primary"><i class="fa fa-eye"></i> View</a></td>
                                         </tr>
                                         <?php
                                         }
@@ -75,6 +74,6 @@ $sql = "SELECT * FROM clinics WHERE clinic_id = ?";
         <!-- End Page Content -->
     </div>
 
-    <?php include 'includes/footer.php';?>
+    <?php include JS_PATH;?>
 </body>
 </html>

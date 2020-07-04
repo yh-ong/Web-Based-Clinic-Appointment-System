@@ -6,8 +6,8 @@ include('./includes/session.inc.php');
 include(SELECT_HELPER);
 include(EMAIL_HELPER);
 
-$errFName = $errLName = $errSpec = $errYears = $errSpoke = $errGender = $errEmail = $errContact =  "";
-$classFName = $classLName = $classSpec = $classYears = $classSpoke = $classGender = $classEmail = $errContact = "";
+$errFName = $errLName = $errSpec = $errYears = $errFee = $errSpoke = $errGender = $errEmail = $errContact = $errImage = "";
+$classFName = $classLName = $classSpec = $classYears = $classFee = $classSpoke = $classGender = $classEmail = $errContact = "";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $fname       = escape_input($_POST['inputFirstName']);
@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $speciality = escape_input($_POST['inputSpeciality']);
     }
     $years      = escape_input($_POST['inputYrsExp']);
+    $fees      = escape_input($_POST['inputFee']);
     $desc       = escape_input($_POST['inputDesc']);
     if (isset($_POST['inputLanguages'])) {
         $lang = $_POST['inputLanguages'];
@@ -62,6 +63,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $classYears = $error_html['errClass'];
         }
     }
+    
+    if (empty($fees)) {
+        $errFee = $error_html['errFee'];
+        $classFee = $error_html['errClass'];
+    } else {
+        if (!filter_var($fees, FILTER_VALIDATE_INT)) {
+            $errFee = $error_html['invalidInt'];
+            $classFee = $error_html['errClass'];
+        }
+    }
 
     if (empty($lang)) {
         $errSpoke = $error_html['errSpoke'];
@@ -90,6 +101,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $errContact = $error_html['invalidInt'];
             $classContact = $error_html['errClass'];
         }
+    }
+
+    if (empty($_FILES['inputAvatar']['name'])) {
+        $errImage = "Image is required";
+        $classImage = "invalid";
     }
 }
 ?>
@@ -124,6 +140,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .imageupload .thumbnail {
             margin-bottom: 10px;
         }
+
+        .imageupload .invalid {
+            border: 1px solid red;
+        }
     </style>
 </head>
 
@@ -147,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label for="inputLastName">Last Name/Surname</label>
-                                        <input type="text" name="inputLastName" class="form-control <?php echo $classFName ?>" id="inputLastName" placeholder="Enter First Name">
+                                        <input type="text" name="inputLastName" class="form-control <?php echo $classFName ?>" id="inputLastName" placeholder="Enter Last Name">
                                         <?php echo $errLName; ?>
                                     </div>
                                 </div>
@@ -159,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                             <?php
                                             $table_result = mysqli_query($conn, "SELECT * FROM speciality");
                                             while ($table_row = mysqli_fetch_assoc($table_result)) {
-                                                echo '<option value="' . $table_row["speciality_name"] . '">' . $table_row["speciality_name"] . '</option>';
+                                                echo '<option value="' . $table_row["speciality_id"] . '">' . $table_row["speciality_name"] . '</option>';
                                             }
                                             ?>
                                         </select>
@@ -170,6 +190,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         <input type="text" name="inputYrsExp" class="form-control <?= $classYears ?>" id="inputYrsExp" placeholder="Enter Years Experience">
                                         <?= $errYears ?>
                                     </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="inputFee">Consultant Fees</label>
+                                        <input type="text" name="inputFee" class="form-control <?= $classFee ?>" id="inputFee" placeholder="Enter Consultant Fees">
+                                        <?= $errFee ?>
+                                    </div>
                                 </div>
                                 <!-- End Add Doctor -->
                             </div>
@@ -178,7 +203,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <div class="card col-md-3">
                             <div class="card-body">
                                 <div class="imageupload">
-                                    <img src="../assets/img/empty/empty-avatar.jpg" id="output" class="img-fluid thumbnail" alt="Doctor-Avatar" title="Doctor-Avatar">
+                                    <small class="text-danger"><?= $errImage ?></small>
+                                    <img src="../assets/img/empty/empty-avatar.jpg" id="output" class="img-fluid thumbnail <?= $classImage ?>" alt="Doctor-Avatar" title="Doctor-Avatar">
                                     <div class="file-tab">
                                         <label class="btn btn-sm btn-primary btn-block btn-file">
                                             <span>Browse</span>
@@ -232,10 +258,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="card">
                         <div class="card-body">
                             <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="inputAge">Age</label>
-                                    <input type="text" name="inputAge" class="form-control" id="inputAge" placeholder="Enter Age">
-                                </div>
                                 <div class="form-group col-md-6">
                                     <label for="inputDOB">Date of Birth</label>
                                     <input type="text" name="inputDOB" class="form-control" id="datepicker" placeholder="Enter DOB">
@@ -314,24 +336,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 </html>
 <?php
-function randomPassword()
-{
-    $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-    $pass = array(); //remember to declare $pass as an array
-    $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
-    for ($i = 0; $i < 8; $i++) {
-        $n = rand(0, $alphaLength);
-        $pass[] = $alphabet[$n];
-    }
-    return implode($pass); //turn the array into a string
-}
-
 if (isset($_POST["savebtn"])) {
     // ! prefer use empty() for each instead of function multi_empty()  *stackoverflow
-    if (multi_empty($errFName, $errLName, $errSpec, $errYears, $errSpoke, $errGender, $errEmail, $errContact)) {
+    if (multi_empty($errFName, $errLName, $errSpec, $errYears, $errFee, $errSpoke, $errGender, $errEmail, $errContact, $errImage)) {
 
         if (isset($_FILES["inputAvatar"]["name"])) {
-            $allowed =  array('gif', 'png', 'jpg');
+            $allowed =  array('gif', 'png', 'jpg', 'jpeg');
             $filename = $_FILES['inputAvatar']['name'];
             $ext = pathinfo($filename, PATHINFO_EXTENSION);
             if (!in_array($ext, $allowed)) {
@@ -356,17 +366,40 @@ if (isset($_POST["savebtn"])) {
             }
         }
 
-        $password = randomPassword();
+        $token = generateCode(6);
+        $en_token = md5($token);
 
-        $stmt = $conn->prepare("INSERT INTO doctors (doctor_avatar, doctor_firstname, doctor_lastname, doctor_speciality, doctor_experience, doctor_desc, doctor_password, doctor_spoke, doctor_gender, doctor_dob, doctor_email, doctor_contact, date_created, clinic_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-        $stmt->bind_param("ssssissssssssi", $image, $fname, $lname, $speciality, $years, $desc, $password, $spoke, $gender, $dob, $email, $contact, $date_created, $clinic_row['clinic_id']);
+        $stmt = $conn->prepare("INSERT INTO doctors (doctor_avatar, doctor_firstname, doctor_lastname, doctor_speciality, doctor_experience, doctor_desc, doctor_spoke, doctor_gender, doctor_dob, doctor_email, doctor_contact, consult_fee, date_created, clinic_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        $stmt->bind_param("ssssissssssssi", $image, $fname, $lname, $speciality, $years, $desc, $spoke, $gender, $dob, $email, $contact, $fees, $date_created, $clinic_row['clinic_id']);
         if ($stmt->execute()) {
-            sendmail($email, $mail['acc_subject'], $mail['acc_title'], $mail['acc_content'], $mail['acc_button'], "/doclab/doctor/verification.php");
-            echo '<script>
-            Swal.fire({ title: "Great!", text: "New Record Added!", type: "success" }).then((result) => {
-                if (result.value) { window.location.href = "doctor-add.php"; }
-            });
-            </script>';
+
+            $last_id = $conn->insert_id;
+            mysqli_query($conn,"INSERT INTO treatment_type (treatment_name, doctor_id) VALUES ('New Patient', $last_id) ");
+
+            $selector = bin2hex(random_bytes(8));
+            $validator = random_bytes(32);
+            $link = $_SERVER["SERVER_NAME"] . "/doclab/doctor/activate.php?selector=".$selector."&validator=". bin2hex($validator);
+            $expries = date("U") + 86400; // one day
+
+            $delstmt = $conn->prepare("DELETE FROM doctor_reset WHERE reset_email = ?");
+            $delstmt->bind_param("s", $email);
+            $delstmt->execute();
+
+            $hashedToken = password_hash($validator, PASSWORD_DEFAULT);
+
+            $resetstmt = $conn->prepare("INSERT INTO doctor_reset (reset_email, reset_selector, reset_token, reset_expires, activate_token) VALUE (?,?,?,?,?)");
+            $resetstmt->bind_param("sssss", $email, $selector, $hashedToken, $expries, $en_token);
+            $resetstmt->execute();
+
+            if (sendmail($email, $mail['acc_subject'], $mail['acc_title'], $mail['acc_content'], $mail['acc_button'], $link, $token)) {
+                echo '<script>
+                Swal.fire({ title: "Great!", text: "New Doctor Added!", type: "success" }).then((result) => {
+                    if (result.value) { window.location.href = "doctor-list.php"; }
+                });
+                </script>';
+            } else {
+                echo 'Something Wrong';
+            }
         } else {
             echo 'Something Wrong';
         }

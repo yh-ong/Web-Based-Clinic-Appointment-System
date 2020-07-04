@@ -33,7 +33,7 @@ $modalclassName = "";
 
 if (isset($_POST['editbtn'])) {
 	$newName = escape_input($_POST['inputNewTreatment']);
-	$tid = $_POST['treatmentID'];
+	$tid = escape_input($_POST['treatmentID']);
 
 	if (empty($newName)) {
 		$modalerrName = '<div class="invalid-feedback">This Field is required</div>';
@@ -55,7 +55,7 @@ if (isset($_POST['editbtn'])) {
 }
 
 if (isset($_POST['deletebtn'])) {
-	$tid = $_POST['treatmentID'];
+	$tid = escape_input($_POST['treatmentID']);
 	$treatstmt = $conn->prepare("DELETE FROM treatment_type WHERE treatment_id = ?");
 	$treatstmt->bind_param("i", $tid);
 	$treatstmt->execute();

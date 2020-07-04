@@ -23,7 +23,7 @@ include('./includes/session.inc.php');
 						<?php
 						function headerTable()
 						{
-							$header = array("Name", "Phone", "Email", "Action");
+							$header = array("Name", "IC/Passport Number", "Phone", "Email", "Action");
 							$arrlen = count($header);
 							for ($i = 0; $i < $arrlen; $i++) {
 								echo "<th>" . $header[$i] . "</th>" . PHP_EOL;
@@ -39,19 +39,16 @@ include('./includes/session.inc.php');
 								</thead>
 								<tbody>
 									<?php
-									$tresult = $conn->query(
-											"SELECT * FROM appointment
-											JOIN patients ON appointment.patient_id = patients.patient_id
-											JOIN doctors ON appointment.doctor_id = doctors.doctor_id
-											WHERE appointment.doctor_id = '".$doctor_row['doctor_id']."' AND appointment.status = 1"
-										);
+									$que = "SELECT DISTINCT patients.patient_id, patients.patient_lastname, patients.patient_firstname, patients.patient_identity, patients.patient_contact, patients.patient_email FROM appointment, patients WHERE appointment.patient_id = patients.patient_id AND appointment.doctor_id = '".$doctor_row['doctor_id']."' AND appointment.status = 1 ";
+									$tresult = $conn->query($que);
 									while ($trow = $tresult->fetch_assoc()) {
 										?><tr>
 											<td><?= $trow["patient_lastname"] . ' ' . $trow["patient_firstname"]; ?></td>
+											<td><?= $trow["patient_identity"]; ?></td>
 											<td><?= $trow["patient_contact"]; ?></td>
 											<td><?= $trow["patient_email"]; ?></td>
 											<td>
-												<a href="patient-view.php?id=<?= $trow["patient_id"]; ?>" class="btn btn-sm btn-outline-info"><i class="fa fa-eye"></i> View</a>
+												<a href="patient-view.php?id=<?= encrypt_url($trow["patient_id"]); ?>" class="btn btn-sm btn-outline-info"><i class="fa fa-eye"></i> View</a>
 											</td>
 										</tr>
 									<?php

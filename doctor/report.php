@@ -97,6 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 				data: {
 					datefrom: from,
 					dateto: to,
+					id: <?= $doctor_row["doctor_id"] ?>
 				},
 				url: 'loadReport.php',
 				dateType: "html",

@@ -5,7 +5,7 @@ require_once('./includes/session.inc.php');
 
 $errors = array();
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if (isset($_POST["savebtn"])) {
     $id         = $admin_row["clinicadmin_id"];
     $name       = escape_input($_POST['inputName']);
     $email      = escape_input($_POST['inputEmailAddress']);
@@ -27,6 +27,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         array_push($errors, "Contact Number is required");
     }
 }
+
+// Reset Password
+if (isset($_POST["resetbtn"])) {
+    $id      = $admin_row["clinicadmin_id"];
+    $oldpass = $conn->real_escape_string($_POST['inputOldPassword']);
+    $newpass = $conn->real_escape_string($_POST['inputNewPassword']);
+    $conpass = $conn->real_escape_string($_POST['inputConfirmPassword']);
+
+    $passstmt = $conn->prepare("SELECT * FROM clinic_manager WHERE clinicadmin_id =?");
+    $passstmt->bind_param("i", $id);
+    $passstmt->execute();
+    $result = $passstmt->get_result();
+    $row = $result->fetch_assoc();
+    $token = $row["clinicadmin_token"];
+    $password = decrypt($row["clinicadmin_password"], $token);
+
+    if (empty($oldpass)) {
+		array_push($errors, "Password is required");
+	} elseif (empty($newpass)) {
+		array_push($errors, "New Password is required");
+	} elseif (empty($conpass)) {
+		array_push($errors, "Confirm Password is required");
+	} elseif (md5($oldpass) != $password) {
+		array_push($errors, "Incorrect Password");
+	} elseif (!empty($newpass)) {
+        password_validation($newpass);
+    } elseif ($newpass != $conpass) {
+        array_push($errors, "Password not Equal");
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,47 +66,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 
 <body>
+    <?php
+        if (isset($_POST["resetbtn"])) {
+            if (count($errors) == 0) {
+                $newtoken = generateCode(22);
+                $en_pass = encrypt(md5($newpass), $newtoken);
+                $stmt2 = $conn->prepare("UPDATE clinic_manager SET clinicadmin_password = ?, clinicadmin_token = ? WHERE clinicadmin_id = ?");
+                $stmt2->bind_param("ssi", $en_pass, $newtoken, $id);
+                if ($stmt2->execute()) {
+                    echo '<script>
+                        Swal.fire({ title: "Great!", text: "Password Reset Successfully!", type: "success" }).then((result) => {
+                            if (result.value) { window.location.href = "admin.php"; }
+                        })
+                        </script>';
+                } else {
+                    echo "Error: " . $query . "<br>" . mysqli_error($conn);
+                }
+            }
+        }
+    ?>
     <?php include NAVIGATION; ?>
     <div class="page-content" id="content">
         <?php include HEADER; ?>
         <!-- Page content -->
-        <div class="row">
-            <div class="col-12 mt-3">
-                <button type="button" class="btn btn-primary btn-sm pull-right px-5" data-toggle="modal" data-target="#modalPassword">Change Password</button>
-            </div>
-            <!-- Modal -->
-            <div class="modal fade" id="modalPassword" tabindex="-1" role="dialog" aria-labelledby="modalPasswordTitle" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h6 class="modal-title" id="modalPasswordTitle">Reset Password</h6>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        </div>
-                        <form name="resetform" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" autocomplete="off">
-                            <div class="modal-body">
-                                <div class="form-group">
-                                    <label for="inputOldPassword">Old Password</label>
-                                    <input type="text" name="inputOldPassword" class="form-control" id="inputOldPassword" placeholder="Enter Old Password">
-                                </div>
-                                <div class="form-group">
-                                    <label for="inputNewPassword">New Password</label>
-                                    <input type="text" name="inputNewPassword" class="form-control" id="inputNewPassword" placeholder="Enter New Password">
-                                    <small class="form-text text-muted" id="passwordHelp">Use 8 or more characters with a mix of letters, numbers & symbols</small>
-                                </div>
-                                <div class="form-group">
-                                    <label for="inputConfirmPassword">Confirm New Password</label>
-                                    <input type="text" name="inputConfirmPassword" class="form-control" id="inputConfirmPassword" placeholder="Enter Confirm New Password">
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary" name="resetbtn">Reset</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
         <div class="row">
             <div class="col-12">
                 <form name="regform" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" autocomplete="off">
@@ -112,7 +124,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <button type="submit" class="btn btn-primary btn-block" name="savebtn">Save</button>
                     </div>
                 </form>
+            </div>
+        </div>
 
+        <div class="row">
+            <div class="col-12">
+                <form name="resetform" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" autocomplete="off">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="inputOldPassword">Old Password</label>
+                                <input type="password" name="inputOldPassword" class="form-control" id="inputOldPassword" placeholder="Enter Old Password">
+                            </div>
+                            <div class="form-group">
+                                <label for="inputNewPassword">New Password</label>
+                                <input type="password" name="inputNewPassword" class="form-control" id="inputNewPassword" placeholder="Enter New Password">
+                                <small class="form-text text-muted" id="passwordHelp">Use 8 or more characters with a mix of letters, numbers & symbols</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputConfirmPassword">Confirm New Password</label>
+                                <input type="password" name="inputConfirmPassword" class="form-control" id="inputConfirmPassword" placeholder="Enter Confirm New Password">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md-3 mt-3">
+                        <button type="submit" class="btn btn-primary btn-block" name="resetbtn">Reset Password</button>
+                    </div>
+                </form>
             </div>
         </div>
         <!-- End Page Content -->
@@ -140,52 +178,5 @@ if (isset($_POST["savebtn"])) {
         }
         $stmt->close();
     }
-}
-
-// Reset Password
-if (isset($_POST["resetbtn"])) {
-    $id      = $admin_row["clinicadmin_id"];
-    $oldpass = $conn->real_escape_string(md5($_POST['inputOldPassword']));
-    $newpass = $conn->real_escape_string(md5($_POST['inputNewPassword']));
-    $conpass = $conn->real_escape_string(md5($_POST['inputConfirmPassword']));
-
-    $stmt = $conn->prepare("SELECT clinicadmin_password FROM clinic_manager WHERE clinicadmin_id =?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-    /* $sql = "SELECT clinicadmin_password FROM clinic_manager WHERE clinicadmin_id = '" . $id . "' ";
-    $result = mysqli_query($conn, $sql);
-    $row = mysqli_fetch_assoc($result); */
-    $oldpassword = $row["clinicadmin_password"];
-
-    if (empty($oldpass) && empty($newpass)) {
-        echo "<script>Swal.fire('Oops...', 'Password & New Password Cannot Be Empty!', 'error');</script>";
-        exit();
-    }
-
-    if ($oldpass == $oldpassword) {
-        if ($newpass == $conpass) {
-            $query = "UPDATE clinic_manager SET clinicadmin_password = '" . $newpass . "' WHERE clinicadmin_id = '" . $id . "' ";
-            $stmt2 = $conn->prepare("UPDATE clinic_manager SET clinicadmin_password = ? WHERE clinicadmin_id = ?");
-            $stmt2->bind_param("si", $newpass, $id);
-            if ($stmt2->execute()) {
-                echo '<script>
-                    Swal.fire({ title: "Great!", text: "Password Reset Successfully!", type: "success" }).then((result) => {
-                        if (result.value) { window.location.href = "manage-admin.php"; }
-                    })
-                    </script>';
-            } else {
-                echo "Error: " . $query . "<br>" . mysqli_error($conn);
-            }
-        } else {
-            echo "<script>Swal.fire('Oops...', 'New Password Does&apos;t Match!', 'error');</script>";
-        }
-    } else {
-        echo "<script>Swal.fire('Oops...', 'Old Password Does&apos;t Match!', 'error');</script>";
-    }
-
-    $stmt->close();
-    $stmt2->close();
 }
 ?>

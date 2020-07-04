@@ -20,7 +20,7 @@
                 </button>
                 <div class="dropdown-menu dropdown-menu-right">
                     <a href="admin.php" class="dropdown-item"><i class="fa fa-users-cog mr-2"></i>Manage Admin</a>
-                    <a href="#" class="dropdown-item"><i class="fa fa-tools mr-2"></i>Settings</a>
+                    <!-- <a href="#" class="dropdown-item"><i class="fa fa-tools mr-2"></i>Settings</a> -->
                     <div class="dropdown-divider"></div>
                     <a href="logout.php" class="dropdown-item"><i class="fa fa-sign-out-alt mr-2"></i>Log Out</a>
                 </div>

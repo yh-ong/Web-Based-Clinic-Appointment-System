@@ -1,14 +1,14 @@
 <?php
-require_once("includes/dbconnection.php");
-
-include("includes/session.php");
-include("includes/config.php");
+require_once('../config/autoload.php');
+include('includes/path.inc.php');
+include('includes/session.inc.php');
+include(SELECT_HELPER);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <?php include 'includes/styles.php'; ?>
+    <?php include CSS_PATH; ?>
     <style>
         .imageupload .btn-file {
             overflow: hidden;
@@ -39,9 +39,9 @@ include("includes/config.php");
 </head>
 
 <body>
-    <?php include 'includes/navigate.php'; ?>
+    <?php include NAVIGATION; ?>
     <div class="page-content" id="content">
-        <?php include 'includes/header.php'; ?>
+        <?php include HEADER; ?>
         <!-- Page content -->
         <div class="row">
             <div class="col-12">
@@ -49,18 +49,12 @@ include("includes/config.php");
                     <h5 class="card-title mr-auto">Add Patient</h5>
                 </div> -->
                 <!-- Card Content -->
-                <form name="regform" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                <form name="regform" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" enctype="multipart/form-data">
                     <div class="d-flex">
                         <div class="card col-md-9">
                             <div class="card-body">
                                 <div class="card-inner">
                                     <!-- Add Patient -->
-                                    <div class="form-row">
-                                        <div class="form-group col-md-6">
-                                            <label for="inputPatientID">Patient ID #</label>
-                                            <input type="text" name="inputPatientID" class="form-control" id="inputPatientID" disabled>
-                                        </div>
-                                    </div>
                                     <div class="form-row">
                                         <div class="form-group col-md-6">
                                             <label for="inputFirstName">First Name</label>
@@ -80,198 +74,11 @@ include("includes/config.php");
                                         <label for="inputNationality">Nationality</label>
                                         <select name="inputNationality" id="inputNationality" class="form-control selectpicker" data-live-search="true">
                                             <option value="">Choose</option>
-                                            <option value="afghan">Afghan</option>
-                                            <option value="albanian">Albanian</option>
-                                            <option value="algerian">Algerian</option>
-                                            <option value="american">American</option>
-                                            <option value="andorran">Andorran</option>
-                                            <option value="angolan">Angolan</option>
-                                            <option value="antiguans">Antiguans</option>
-                                            <option value="argentinean">Argentinean</option>
-                                            <option value="armenian">Armenian</option>
-                                            <option value="australian">Australian</option>
-                                            <option value="austrian">Austrian</option>
-                                            <option value="azerbaijani">Azerbaijani</option>
-                                            <option value="bahamian">Bahamian</option>
-                                            <option value="bahraini">Bahraini</option>
-                                            <option value="bangladeshi">Bangladeshi</option>
-                                            <option value="barbadian">Barbadian</option>
-                                            <option value="barbudans">Barbudans</option>
-                                            <option value="batswana">Batswana</option>
-                                            <option value="belarusian">Belarusian</option>
-                                            <option value="belgian">Belgian</option>
-                                            <option value="belizean">Belizean</option>
-                                            <option value="beninese">Beninese</option>
-                                            <option value="bhutanese">Bhutanese</option>
-                                            <option value="bolivian">Bolivian</option>
-                                            <option value="bosnian">Bosnian</option>
-                                            <option value="brazilian">Brazilian</option>
-                                            <option value="british">British</option>
-                                            <option value="bruneian">Bruneian</option>
-                                            <option value="bulgarian">Bulgarian</option>
-                                            <option value="burkinabe">Burkinabe</option>
-                                            <option value="burmese">Burmese</option>
-                                            <option value="burundian">Burundian</option>
-                                            <option value="cambodian">Cambodian</option>
-                                            <option value="cameroonian">Cameroonian</option>
-                                            <option value="canadian">Canadian</option>
-                                            <option value="cape verdean">Cape Verdean</option>
-                                            <option value="central african">Central African</option>
-                                            <option value="chadian">Chadian</option>
-                                            <option value="chilean">Chilean</option>
-                                            <option value="chinese">Chinese</option>
-                                            <option value="colombian">Colombian</option>
-                                            <option value="comoran">Comoran</option>
-                                            <option value="congolese">Congolese</option>
-                                            <option value="costa rican">Costa Rican</option>
-                                            <option value="croatian">Croatian</option>
-                                            <option value="cuban">Cuban</option>
-                                            <option value="cypriot">Cypriot</option>
-                                            <option value="czech">Czech</option>
-                                            <option value="danish">Danish</option>
-                                            <option value="djibouti">Djibouti</option>
-                                            <option value="dominican">Dominican</option>
-                                            <option value="dutch">Dutch</option>
-                                            <option value="east timorese">East Timorese</option>
-                                            <option value="ecuadorean">Ecuadorean</option>
-                                            <option value="egyptian">Egyptian</option>
-                                            <option value="emirian">Emirian</option>
-                                            <option value="equatorial guinean">Equatorial Guinean</option>
-                                            <option value="eritrean">Eritrean</option>
-                                            <option value="estonian">Estonian</option>
-                                            <option value="ethiopian">Ethiopian</option>
-                                            <option value="fijian">Fijian</option>
-                                            <option value="filipino">Filipino</option>
-                                            <option value="finnish">Finnish</option>
-                                            <option value="french">French</option>
-                                            <option value="gabonese">Gabonese</option>
-                                            <option value="gambian">Gambian</option>
-                                            <option value="georgian">Georgian</option>
-                                            <option value="german">German</option>
-                                            <option value="ghanaian">Ghanaian</option>
-                                            <option value="greek">Greek</option>
-                                            <option value="grenadian">Grenadian</option>
-                                            <option value="guatemalan">Guatemalan</option>
-                                            <option value="guinea-bissauan">Guinea-Bissauan</option>
-                                            <option value="guinean">Guinean</option>
-                                            <option value="guyanese">Guyanese</option>
-                                            <option value="haitian">Haitian</option>
-                                            <option value="herzegovinian">Herzegovinian</option>
-                                            <option value="honduran">Honduran</option>
-                                            <option value="hungarian">Hungarian</option>
-                                            <option value="icelander">Icelander</option>
-                                            <option value="indian">Indian</option>
-                                            <option value="indonesian">Indonesian</option>
-                                            <option value="iranian">Iranian</option>
-                                            <option value="iraqi">Iraqi</option>
-                                            <option value="irish">Irish</option>
-                                            <option value="israeli">Israeli</option>
-                                            <option value="italian">Italian</option>
-                                            <option value="ivorian">Ivorian</option>
-                                            <option value="jamaican">Jamaican</option>
-                                            <option value="japanese">Japanese</option>
-                                            <option value="jordanian">Jordanian</option>
-                                            <option value="kazakhstani">Kazakhstani</option>
-                                            <option value="kenyan">Kenyan</option>
-                                            <option value="kittian and nevisian">Kittian and Nevisian</option>
-                                            <option value="kuwaiti">Kuwaiti</option>
-                                            <option value="kyrgyz">Kyrgyz</option>
-                                            <option value="laotian">Laotian</option>
-                                            <option value="latvian">Latvian</option>
-                                            <option value="lebanese">Lebanese</option>
-                                            <option value="liberian">Liberian</option>
-                                            <option value="libyan">Libyan</option>
-                                            <option value="liechtensteiner">Liechtensteiner</option>
-                                            <option value="lithuanian">Lithuanian</option>
-                                            <option value="luxembourger">Luxembourger</option>
-                                            <option value="macedonian">Macedonian</option>
-                                            <option value="malagasy">Malagasy</option>
-                                            <option value="malawian">Malawian</option>
-                                            <option value="malaysia">Malaysia</option>
-                                            <option value="maldivan">Maldivan</option>
-                                            <option value="malian">Malian</option>
-                                            <option value="maltese">Maltese</option>
-                                            <option value="marshallese">Marshallese</option>
-                                            <option value="mauritanian">Mauritanian</option>
-                                            <option value="mauritian">Mauritian</option>
-                                            <option value="mexican">Mexican</option>
-                                            <option value="micronesian">Micronesian</option>
-                                            <option value="moldovan">Moldovan</option>
-                                            <option value="monacan">Monacan</option>
-                                            <option value="mongolian">Mongolian</option>
-                                            <option value="moroccan">Moroccan</option>
-                                            <option value="mosotho">Mosotho</option>
-                                            <option value="motswana">Motswana</option>
-                                            <option value="mozambican">Mozambican</option>
-                                            <option value="namibian">Namibian</option>
-                                            <option value="nauruan">Nauruan</option>
-                                            <option value="nepalese">Nepalese</option>
-                                            <option value="new zealander">New Zealander</option>
-                                            <option value="ni-vanuatu">Ni-Vanuatu</option>
-                                            <option value="nicaraguan">Nicaraguan</option>
-                                            <option value="nigerien">Nigerien</option>
-                                            <option value="north korean">North Korean</option>
-                                            <option value="northern irish">Northern Irish</option>
-                                            <option value="norwegian">Norwegian</option>
-                                            <option value="omani">Omani</option>
-                                            <option value="pakistani">Pakistani</option>
-                                            <option value="palauan">Palauan</option>
-                                            <option value="panamanian">Panamanian</option>
-                                            <option value="papua new guinean">Papua New Guinean</option>
-                                            <option value="paraguayan">Paraguayan</option>
-                                            <option value="peruvian">Peruvian</option>
-                                            <option value="polish">Polish</option>
-                                            <option value="portuguese">Portuguese</option>
-                                            <option value="qatari">Qatari</option>
-                                            <option value="romanian">Romanian</option>
-                                            <option value="russian">Russian</option>
-                                            <option value="rwandan">Rwandan</option>
-                                            <option value="saint lucian">Saint Lucian</option>
-                                            <option value="salvadoran">Salvadoran</option>
-                                            <option value="samoan">Samoan</option>
-                                            <option value="san marinese">San Marinese</option>
-                                            <option value="sao tomean">Sao Tomean</option>
-                                            <option value="saudi">Saudi</option>
-                                            <option value="scottish">Scottish</option>
-                                            <option value="senegalese">Senegalese</option>
-                                            <option value="serbian">Serbian</option>
-                                            <option value="seychellois">Seychellois</option>
-                                            <option value="sierra leonean">Sierra Leonean</option>
-                                            <option value="singaporean">Singaporean</option>
-                                            <option value="slovakian">Slovakian</option>
-                                            <option value="slovenian">Slovenian</option>
-                                            <option value="solomon islander">Solomon Islander</option>
-                                            <option value="somali">Somali</option>
-                                            <option value="south african">South African</option>
-                                            <option value="south korean">South Korean</option>
-                                            <option value="spanish">Spanish</option>
-                                            <option value="sri lankan">Sri Lankan</option>
-                                            <option value="sudanese">Sudanese</option>
-                                            <option value="surinamer">Surinamer</option>
-                                            <option value="swazi">Swazi</option>
-                                            <option value="swedish">Swedish</option>
-                                            <option value="swiss">Swiss</option>
-                                            <option value="syrian">Syrian</option>
-                                            <option value="taiwanese">Taiwanese</option>
-                                            <option value="tajik">Tajik</option>
-                                            <option value="tanzanian">Tanzanian</option>
-                                            <option value="thai">Thai</option>
-                                            <option value="togolese">Togolese</option>
-                                            <option value="tongan">Tongan</option>
-                                            <option value="trinidadian or tobagonian">Trinidadian or Tobagonian</option>
-                                            <option value="tunisian">Tunisian</option>
-                                            <option value="turkish">Turkish</option>
-                                            <option value="tuvaluan">Tuvaluan</option>
-                                            <option value="ugandan">Ugandan</option>
-                                            <option value="ukrainian">Ukrainian</option>
-                                            <option value="uruguayan">Uruguayan</option>
-                                            <option value="uzbekistani">Uzbekistani</option>
-                                            <option value="venezuelan">Venezuelan</option>
-                                            <option value="vietnamese">Vietnamese</option>
-                                            <option value="welsh">Welsh</option>
-                                            <option value="yemenite">Yemenite</option>
-                                            <option value="zambian">Zambian</option>
-                                            <option value="zimbabwean">Zimbabwean</option>
+                                            <?php
+                                                foreach ($select_nationality as $nationality_value) {
+                                                    echo '<option value="'.$nationality_value.'">'.$nationality_value.'</option>';
+                                                }
+                                            ?>
                                         </select>
                                     </div>
                                     <!-- End Add Patient -->
@@ -281,16 +88,27 @@ include("includes/config.php");
                         <div class="card col-md-3">
                             <div class="card-body">
                                 <div class="imageupload">
-                                    <img src="./img/empty-avatar-700x480.png" class="img-fluid thumbnail" alt="Doctor-Avatar" title="Doctor-Avatar">
+                                    <img src="../assets/img/empty/empty-avatar.jpg" id="output" class="img-fluid thumbnail" alt="Patient-Avatar" title="Patient-Avatar">
                                     <div class="file-tab">
                                         <label class="btn btn-sm btn-primary btn-block btn-file">
                                             <span>Browse</span>
-                                            <input type="file" name="inputAvatar">
+                                            <input type="file" name="inputAvatar" id="inputAvatar" accept="image/*" onchange="openFile(event)">
                                         </label>
-                                        <!-- <button type="button" class="btn btn-sm btn-primary">Remove</button> -->
                                     </div>
                                 </div>
+                                <script>
+                                    var openFile = function(file) {
+                                        var input = file.target;
 
+                                        var reader = new FileReader();
+                                        reader.onload = function() {
+                                            var dataURL = reader.result;
+                                            var output = document.getElementById('output');
+                                            output.src = dataURL;
+                                        };
+                                        reader.readAsDataURL(input.files[0]);
+                                    };
+                                </script>
                             </div>
                         </div>
                     </div>
@@ -362,10 +180,6 @@ include("includes/config.php");
                                     <label for="inputAddress">Address</label>
                                     <input type="text" name="inputAddress" class="form-control" id="inputAddress" placeholder="1234 Main St">
                                 </div>
-                                <div class="form-group">
-                                    <label for="inputAddress2">Address 2</label>
-                                    <input type="text" name="inputAddress2" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor">
-                                </div>
                                 <div class="form-row">
                                     <div class="form-group col-md-6">
                                         <label for="inputCity">City</label>
@@ -399,7 +213,7 @@ include("includes/config.php");
         <!-- End Page Content -->
     </div>
 
-    <?php include 'includes/footer.php';?>
+    <?php include JS_PATH;?>
     <script>
         $('#datepicker').on('changeDate', function() {
             var date = $(this).datepicker('getDate'),
@@ -423,13 +237,13 @@ include("includes/config.php");
     <?php
     if (isset($_POST['savebtn'])) {
 
-        $fullname = $conn->real_escape_string($_POST['inputFirstName']).' '.$conn->real_escape_string($_POST['inputLastName']);
+        $firstname = $conn->real_escape_string($_POST['inputFirstName']);
+        $lastname = $conn->real_escape_string($_POST['inputLastName']);
 
         $ic = $conn->real_escape_string($_POST['inputIC']);
         $nationality = $conn->real_escape_string($_POST['inputNationality']);
-        $avatars = $conn->real_escape_string($_POST['inputAvatar']);
+        $avatars = $_FILES['inputAvatar']['name'];
 
-        //$gender = $_POST['inputGender'];
         if(!empty($_POST['inputGender'])) {
             $gender=$_POST['inputGender'];
         } else {
@@ -442,7 +256,7 @@ include("includes/config.php");
         $email = $conn->real_escape_string($_POST['inputEmailAddress']);
         $contact = $conn->real_escape_string($_POST['inputContactNumber']);
 
-        $address = $conn->real_escape_string($_POST['inputAddress']).' '.$conn->real_escape_string($_POST['inputAddress2']);
+        $address = $conn->real_escape_string($_POST['inputAddress']);
 
         $city = $conn->real_escape_string($_POST['inputCity']);
         $state = $conn->real_escape_string($_POST['inputState']);
@@ -451,19 +265,58 @@ include("includes/config.php");
         // Check Email
         $result = mysqli_query($conn,"SELECT * FROM patients WHERE patient_email = '.$email.'");
         if (mysqli_num_rows($result) != 0) {
-            echo '<script>alert("Email Already Existed");</script>';
+            echo '<script>
+                Swal.fire({ title: "Oops!", text: "Field Cannot be Empty such as Name, IC, Nationality & Avatar !", type: "error" }).then((result) => {
+                    if (result.value) { window.location.href = "patient-add.php"; }
+                });
+                </script>';
             exit();
-        } else if (empty($fullname) && empty($ic) && empty($nationality) && empty($avatar)) {
-            echo '<script>alert("Cannot Be Empty");</script>';
+        } else if (empty($firstname) && empty($lastname) && empty($ic) && empty($nationality) && empty($avatar)) {
+            echo '<script>
+                Swal.fire({ title: "Oops!", text: "Field Cannot be Empty such as Name, IC, Nationality & Avatar !", type: "error" }).then((result) => {
+                    if (result.value) { window.location.href = "patient-add.php"; }
+                });
+                </script>';
             exit();
         } else {
             try {
                 $sql = 'INSERT INTO patients 
-                        (patient_name, patient_identity, patient_nationality, patient_gender, patient_maritalstatus, patient_dob, patient_age, patient_email, patient_contact, patient_address, patient_city, patient_state, patient_zipcode, date_created)
-                        VALUES ("'.$fullname.'", "'.$ic.'", "'.$nationality.'", "'.$gender.'", "'.$marital_status.'", "'.$dob.'", "'.$age.'", "'.$email.'", "'.$contact.'", "'.$address.'", "'.$city.'", "'.$state.'", "'.$zipcode.'","'.$date_created.'")';
-                mysqli_query($conn,$sql);
-                echo '<script>alert("New record created successfully");s</script>';
-                header("Location: patient-add.php");
+                        (patient_avatar, patient_firstname, patient_lastname, patient_identity, patient_nationality, patient_gender, patient_maritalstatus, patient_dob, patient_age, patient_email, patient_contact, patient_address, patient_city, patient_state, patient_zipcode, date_created)
+                        VALUES ("'.$avatar.'", "'.$firstname.'", "'.$lastname.'", "'.$ic.'", "'.$nationality.'", "'.$gender.'", "'.$marital_status.'", "'.$dob.'", "'.$age.'", "'.$email.'", "'.$contact.'", "'.$address.'", "'.$city.'", "'.$state.'", "'.$zipcode.'","'.$date_created.'")';
+                
+                if (mysqli_query($conn,$sql)) {
+                    $last_id = mysqli_insert_id($conn);
+                    if (isset($_FILES["inputAvatar"]["name"])) {
+                        $allowed =  array('gif', 'png', 'jpg', 'jpeg');
+                        $filename = $_FILES['inputAvatar']['name'];
+                        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+                        if (!in_array($ext, $allowed)) {
+                            echo "<script>Swal.fire('Oops...','Only can be image!','error')</script>";
+                            exit();
+                        } else {
+                            if (!empty($_FILES['inputAvatar']['name'])) {
+                                $folderpath = "../uploads/patient/" . $last_id . "/";
+                                $path = "../uploads/patient/" .  $last_id . "/" . $_FILES['inputAvatar']['name'];
+                                $image = $_FILES['inputAvatar']['name'];
+            
+                                if (!file_exists($folderpath)) {
+                                    mkdir($folderpath, 0777, true);
+                                    move_uploaded_file($_FILES['inputAvatar']['tmp_name'], $path);
+                                } else {
+                                    move_uploaded_file($_FILES['inputAvatar']['tmp_name'], $path);
+                                }
+                            } else {
+                                echo "<script>Swal.fire('Oops...','You should select a file to upload!','error')</script>";
+                                exit();
+                            }
+                        }
+                    }
+                    echo '<script>
+                    Swal.fire({ title: "Great!", text: "New Record Added!", type: "success" }).then((result) => {
+                        if (result.value) { window.location.href = "patient-list.php"; }
+                    });
+                    </script>';
+                }
             } catch (PDOException $e) {
                 echo $sql . "<br>" . $e->getMessage();
             }

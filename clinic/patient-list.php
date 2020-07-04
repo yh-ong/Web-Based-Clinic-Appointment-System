@@ -23,7 +23,7 @@ include('./includes/session.inc.php');
                         <?php
                         function headerTable()
                         {
-                            $header = array("Patient ID", "Patient Name", "Contact Number", "Date Added", "Action");
+                            $header = array("Patient ID", "Patient Name", "IC/ Password", "Contact Number", "Date Added", "Action");
                             $arrlen = count($header);
                             for ($i = 0; $i < $arrlen; $i++) {
                                 echo "<th>" . $header[$i] . "</th>" . PHP_EOL;
@@ -39,16 +39,16 @@ include('./includes/session.inc.php');
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $table_result = mysqli_query($conn, "SELECT * FROM patients");
+                                    $table_result = mysqli_query($conn, "SELECT DISTINCT patients.patient_id, patients.patient_lastname, patients.patient_firstname, patients.patient_identity, patients.patient_contact, patients.date_created FROM appointment, patients WHERE appointment.patient_id = patients.patient_id AND appointment.clinic_id = '".$clinic_row['clinic_id']."' AND appointment.status = 1 ");
                                     while ($table_row = mysqli_fetch_assoc($table_result)) {
                                         ?><tr>
                                             <td><?= $table_row["patient_id"]; ?></td>
                                             <td><?= $table_row["patient_lastname"] . ' ' . $table_row["patient_firstname"]; ?></td>
+                                            <td><?= $table_row["patient_identity"]; ?></td>
                                             <td><?= $table_row["patient_contact"]; ?></td>
                                             <td><?= $table_row["date_created"]; ?></td>
                                             <td>
-                                                <a href="patient-view.php?cid=<?= $table_row["patient_id"]; ?>" class="btn btn-sm btn-primary"><i class="fa fa-eye"></i> View</a>
-                                                <!-- <a href="patient-edit.php?cid=<?= $table_row["patient_id"]; ?>" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i> Edit</a> -->
+                                                <a href="patient-view.php?cid=<?= encrypt_url( $table_row["patient_id"]); ?>" class="btn btn-sm btn-primary"><i class="fa fa-eye"></i> View</a>
                                             </td>
                                         </tr>
                                     <?php

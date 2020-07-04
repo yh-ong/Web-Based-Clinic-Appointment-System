@@ -37,7 +37,14 @@ include('./includes/session.inc.php');
                 <div class="card">
                     <div class="card-body">
                         <h5 class="font-weight-bold mb-2">Dr. <?php echo $doctor_row["doctor_lastname"] . ' ' . $doctor_row["doctor_firstname"]; ?></h5>
-                        <h6><?= $doctor_row["doctor_speciality"]; ?></h6>
+                        <h6>
+                            <?php
+                            $table_result = mysqli_query($conn, "SELECT * FROM speciality WHERE speciality_id =  '".$doctor_row["doctor_speciality"]."' ");
+                            while ($table_row = mysqli_fetch_assoc($table_result)) {
+                                echo $table_row['speciality_name'];
+                            }
+                            ?>
+                        </h6>
                     </div>
                 </div>
                 <div class="mt-3">

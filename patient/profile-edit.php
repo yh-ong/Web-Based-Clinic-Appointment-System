@@ -16,9 +16,12 @@ if(isset($_POST['inputID'])) {
 	$maritalstatus = mysqli_escape_string($conn,$_POST['inputMaritalStatus']);
 	$nationality = mysqli_escape_string($conn,$_POST['inputNationality']);
 
-	$query = "UPDATE patients SET patient_firstname = '".$firstname."', patient_lastname = '".$lastname."', patient_identity = '".$identity."', patient_email = '".$email."', patient_dob = '".$dob."', patient_gender = '".$gender."', patient_contact = '".$contact."', patient_maritalstatus = '".$maritalstatus."', patient_nationality = '".$nationality."' WHERE patient_id = '".$id."' ";
+	// $query = "UPDATE patients SET patient_firstname = '".$firstname."', patient_lastname = '".$lastname."', patient_identity = '".$identity."', patient_email = '".$email."', patient_dob = '".$dob."', patient_gender = '".$gender."', patient_contact = '".$contact."', patient_maritalstatus = '".$maritalstatus."', patient_nationality = '".$nationality."' WHERE patient_id = '".$id."' ";
+	
+	$stmt = $conn->prepare("UPDATE patients SET patient_firstname = ?, patient_lastname = ?, patient_identity = ?, patient_email = ?, patient_dob = ?, patient_gender = ?, patient_contact = ?, patient_maritalstatus = ?, patient_nationality = ? WHERE patient_id = ? ");
+	$stmt->bind_param("ssssssssss", $firstname, $lastname, $identity, $email, $dob, $gender, $contact, $maritalstatus, $nationality, $id);
 
-	if (mysqli_query($conn, $query)) {
+	if ($stmt->execute()) {
 		$result2 = $conn->query("SELECT * FROM patients WHERE patient_id = '".$id."' ");
 		$numrows = mysqli_num_rows($result2);
 

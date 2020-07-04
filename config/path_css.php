@@ -27,3 +27,5 @@ foreach ($cssItem as $cssPath) {
 
 echo '<script src="../assets/js/sweetalert2.all.min.js"></script>'.PHP_EOL;
 echo '<script src="../assets/js/jquery-3.4.1.min.js"></script>'.PHP_EOL;
+echo '<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>'.PHP_EOL;
+// echo '<script>$(window).resize(function(){drawChart();});</script>'.PHP_EOL;

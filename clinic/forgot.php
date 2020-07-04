@@ -1,13 +1,37 @@
 <?php
 require_once('../config/autoload.php');
 require_once('./includes/path.inc.php');
+include(EMAIL_HELPER);
+
+$errors = array();
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST')
+{
+	$email = escape_input($_POST["inputEmailAddress"]);
+
+	$forgotstmt = $conn->prepare("SELECT * FROM clinic_manager WHERE clinicadmin_email = ?");
+	$forgotstmt->bind_param("s", $email);
+	$forgotstmt->execute();
+	$result = $forgotstmt->get_result();
+	$r = $result->fetch_assoc();
+
+	$clinicadmin_id = $r['clinicadmin_id'];
+
+	if (empty($email)) {
+		array_push($errors, "Email Address is required");
+	} else if ($result->num_rows != 1) {
+		array_push($errors, "Email Not Exist");
+	} else {
+		email_validation($email);
+	}
+}
 ?>
 <!DOCTYPE html>
 <html>
 
 <head>
     <?php include CSS_PATH; ?>
-    <link rel="stylesheet" href="../assets/css/login.css">
+    <link rel="stylesheet" href="../assets/css/clinic/login.css">
 </head>
 
 <body>
@@ -19,6 +43,7 @@ require_once('./includes/path.inc.php');
             </div>
             <div class="login-body">
                 <form name="forgot_form" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+				<?= display_error(); ?>
                     <div class="form-group">
                         <label for="inputEmailAddress">Email address</label>
                         <input type="email" name="inputEmailAddress" class="form-control" id="inputEmailAddress" aria-describedby="emailHelp" placeholder="example@email.com">
@@ -38,50 +63,33 @@ require_once('./includes/path.inc.php');
 </html>
 <?php
 if (isset($_POST["forgotbtn"])) {
-    $email = mysqli_real_escape_string($conn, $_POST["inputEmailAddress"]);
-    $query = "SELECT * FROM clinic_manager WHERE clinicadmin_email = '$email'";
-    $result = mysqli_query($conn, $query);
+    if (count($errors) == 0) 
+	{
+		$selector = bin2hex(random_bytes(8));
+		$validator = random_bytes(32);
+		$link = $_SERVER["SERVER_NAME"] . "/doclab/clinic/reset.php?selector=".$selector."&validator=". bin2hex($validator);
+		$expries = date("U") + 1800;
 
-    if (mysqli_num_rows($result) != 1) {
-        echo "<script>Swal.fire('Oops...','Email Not Exits','error')</script>";
-    } else {
-        $r = mysqli_fetch_assoc($result);
-        $password = $r['clinicadmin_password'];
-        // $to = $r['clinicadmin_email'];
-        $to = "ongyh97@gmail.com";
-        $subject = "Your Recovered Password";
+		$userEmail = $_POST["inputEmailAddress"];
 
-        $message  = '<html><body style="font-family:Arial, Helvetica, sans-serif;padding:10px 20px;"><div align="center">';
-        $message .= '<table width="600" cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="#fcfcfc"><tbody><tr>';
-        $message .= '<td style="border-left:1px solid #ddd;border-right:1px solid #ddd">';
-        $message .= '<table width="100%" bgcolor="#f4f6f6" style="border-top:1px solid #ddd;"><tr>';
-        $message .= '<td style="height:80px" bgcolor="#f4f6f6"></td><td>';
-        $message .= '<div style="font-size:2em;text-align:center;font-weight:600;"><span style="color: #6F42C2;">US</span>.com</div>';
-        $message .= '</td></tr></table>';
-        $message .= '<table cellpadding="0" cellspacing="0" border="0" width="500" align="center" style="margin:25px 50px 25px 50px">';
-        $message .= '<tbody><tr><td>';
-        $message .= '<p style="font-size:16px;line-height:24px;color:#3c424f">' . $r["clinicadmin_name"] . ',</p>';
-        $message .= "<p style='font-size:16px;line-height:24px;color:#3c424f'>We've received a request to reset your password. If you didn't make the request,just ignore this email. Otherwise, you can reset your password using this link:</p><br>";
-        $message .= '<p style="margin:0" align="middle">';
-        $message .= '<a href="http://localhost/hotel/hotel_frontend/forgot.php?bid=' . $r["clinicadmin_id"] . '" style="background-color:#6F42C2;color:#fff;display:inline-block;padding:0 40px;margin:0;border-radius:4px;font-size:16px;line-height:48px;text-align:center;text-decoration:none;vertical-align:center" target="_blank">Reset your Password</a>';
-        $message .= '</p><br><p style="font-size:16px;line-height:24px;color:#3c424f">Thanks,<br><strong>The Clinic Team</strong></p>';
-        $message .= '</td></tr></tbody></table>';
-        $message .= '<table width="100%" bgcolor="#f4f6f6" cellpadding="0" cellspacing="0" border="0">';
-        $message .= '<table width="100%" bgcolor="#f4f6f6" style="border-bottom:1px solid #ddd;">';
-        $message .= '<tr><td style="height:80px" bgcolor="#f4f6f6"></td><td>';
-        $message .= '<div style="font-size:1em;text-align:center;font-weight:600;"><span style="color: #6F42C2;">US </span>.com</div>';
-        $message .= '<div style="font-size:0.9em;text-align:center;color:#aaa;">&copy; US Teams</div>';
-        $message .= '</td></tr></table></table></td></tr></tbody></table></div></body></html>';
+		$stmt = $conn->prepare("DELETE FROM clinic_reset WHERE reset_email = ?");
+		$stmt->bind_param("s", $userEmail);
+		$stmt->execute();
 
-        $headers = 'From: ushotel97@gmail.com' . "\r\n" . 'Reply-To: ongyh97@gmail.com';
-        $headers .= "MIME-Version: 1.0\r\n";
-        $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+		$hashedToken = password_hash($validator, PASSWORD_DEFAULT);
 
-        if (mail($to, $subject, $message, $headers)) {
-            echo "<script>Swal.fire('Great !','Your Password Has Been Sent to Your Email','success')</script>";
-        } else {
-            echo "<script>Swal.fire('Oops...','Failed to Recover Your Password! Try Again!','error')</script>";
-        }
-    }
+		$stmt = $conn->prepare("INSERT INTO clinic_reset (reset_email, reset_selector, reset_token, reset_expires) VALUE (?,?,?,?)");
+		$stmt->bind_param("ssss", $userEmail, $selector, $hashedToken, $expries);
+		$stmt->execute();
+
+		$stmt->close();
+		
+		if (sendmail($userEmail, $mail['fg_subject'], $mail['fg_title'], $mail['fg_content'], $mail['fg_button'], $link, "")) {
+			echo "<script>Swal.fire('Great !','Your Password Has Been Sent to Your Email','success')</script>";
+		} else {
+			echo "<script>Swal.fire('Oops...','Failed to Recover Your Password! Try Again!','error')</script>";
+		}
+	}
+	$forgotstmt->close();
 }
 ?>

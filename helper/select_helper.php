@@ -7,7 +7,7 @@ $select_maritalstatus = array("Single", "Married", "Divorced", "Widowed");
 /*
  * Langauges
  */
-$select_lang = array("English", "Malay", "Chinese", "Tamil", "Portuguese", "Dutch");
+$select_lang = array("English", "Malay", "Chinese", "Tamil", "Portuguese", "Dutch", "Russian", "Arabic");
 
 /*
  * State
@@ -38,7 +38,7 @@ $select_state = array(
  */
 $select_nationality = array(
     "Malaysia",
-    "Singaporean",
+    "Singapore",
     "Afghan",
     "Albanian",
     "Algerian",

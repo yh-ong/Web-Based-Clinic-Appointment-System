@@ -19,6 +19,6 @@
 
 
 # Error Page ！important
-#ErrorDocument 404 http://localhost/app/clinic/layouts/404.php
+#ErrorDocument 404 http://localhost/doclab/clinic/layouts/404.php
 
 #</IfModule>

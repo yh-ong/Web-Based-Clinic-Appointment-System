@@ -20,9 +20,9 @@ $doctor_row = mysqli_fetch_assoc($result);
         <?php include HEADER; ?>
         <!-- Page content -->
         <div class="row">
-            <div class="col-12 mt-3 mb-3">
+            <!-- <div class="col-12 mt-3 mb-3">
                 <a href="./doctor-edit.php" class="btn btn-primary btn-sm pull-right px-5">Edit Doctor Profile</a>
-            </div>
+            </div> -->
 
             <div class="col-md-3">
                 <div class="card">
@@ -41,7 +41,14 @@ $doctor_row = mysqli_fetch_assoc($result);
                 <div class="card">
                     <div class="card-body">
                         <h5 class="font-weight-bold mb-2">Dr. <?php echo $doctor_row["doctor_lastname"] . ' ' . $doctor_row["doctor_firstname"]; ?></h5>
-                        <h6><?= $doctor_row["doctor_speciality"]; ?></h6>
+                        <h6>
+                            <?php
+                            $table_result = mysqli_query($conn, "SELECT * FROM speciality WHERE speciality_id =  '".$doctor_row["doctor_speciality"]."' ");
+                            while ($table_row = mysqli_fetch_assoc($table_result)) {
+                                echo $table_row['speciality_name'];
+                            }
+                            ?>
+                        </h6>
                     </div>
                 </div>
                 <div class="mt-3">

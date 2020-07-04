@@ -1,4 +1,4 @@
-<nav class="navbar sidebar-shadow">
+<nav class="navbar navbar-header mb-2">
     <ul class="nav mr-auto">
         <li class="nav-item">
             <button class="btn btn-sm btn-expand" id="sidebarCollapse"><i class="fa fa-bars"></i></button>
@@ -25,7 +25,7 @@
                     Hi, <?php echo $doctor_row["doctor_lastname"].' '.$doctor_row["doctor_firstname"]; ?>
                 </button>
                 <div class="dropdown-menu dropdown-menu-right">
-                    <a href="#" class="dropdown-item"><i class="fa fa-tools mr-2"></i>Settings</a>
+                    <!-- <a href="#" class="dropdown-item"><i class="fa fa-tools mr-2"></i>Settings</a> -->
                     <a href="password.php" class="dropdown-item"><i class="fa fa-unlock-alt mr-2"></i>Change Password</a>
                     <div class="dropdown-divider"></div>
                     <a href="logout.php" class="dropdown-item"><i class="fa fa-sign-out-alt mr-2"></i>Log Out</a>

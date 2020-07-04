@@ -1,22 +1,21 @@
 <?php
-require_once("includes/dbconnection.php");
+require_once("../config/autoload.php");
+include("includes/session.inc.php");
+include("includes/path.inc.php");
 
-include("includes/session.php");
-include("includes/config.php");
-
-$pid = $_REQUEST["pid"];
+$pid = decrypt_url($_REQUEST["pid"]);
 $result = mysqli_query($conn, "SELECT * FROM patients WHERE patient_id = $pid");
 $row = mysqli_fetch_assoc($result);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <?php include 'includes/styles.php'; ?>
+    <?php include CSS_PATH; ?>
 </head>
 <body>
-    <?php include 'includes/navigate.php';?>
+    <?php include NAVIGATION;?>
     <div class="page-content" id="content">
-        <?php include 'includes/header.php';?>
+        <?php include HEADER;?>
         <!-- Page content -->
         <div class="row">
             <div class="col-12">
@@ -24,7 +23,7 @@ $row = mysqli_fetch_assoc($result);
                 <div class="card shadow-sm rounded">
                     <div class="card-body">
                         <div class="d-flex mb-3">
-                            <h5 class="card-title mr-auto">View Patient : <?php echo strtoupper($row["patient_name"])?></h5>
+                            <h5 class="card-title mr-auto">View Patient : <?php echo strtoupper($row["patient_firstname"].' '.$row["patient_lastname"])?></h5>
                         </div>
                         <div class="card-inner">
                             <!-- View -->
@@ -32,21 +31,12 @@ $row = mysqli_fetch_assoc($result);
                                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
                                     <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-info" role="tab"
                                         aria-controls="nav-home" aria-selected="true">Patient Info</a>
-                                    <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-history" role="tab"
-                                        aria-controls="nav-profile" aria-selected="false">Medication History</a>
                                     <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-appointment" role="tab"
                                         aria-controls="nav-contact" aria-selected="false">Appointment</a>
-                                    <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-message" role="tab"
-                                        aria-controls="nav-contact" aria-selected="false">Message</a>
                                 </div>
                             </nav>
                             <div class="tab-content" id="nav-tabContent">
                                 <div class="tab-pane fade show active" id="nav-info" role="tabpanel" aria-labelledby="info-tab">
-                                    <div class="d-flex align-items-center">
-                                        <div class="ml-auto mt-2 mb-2">
-                                            <button class="btn btn-sm btn-primary"><i class="fa fa-pencil-alt mr-2"></i>Edit Info</button>
-                                        </div>
-                                    </div>
                                     <table class="table table-bordered">
                                         <?php if (mysqli_num_rows($result) < 1) {
                                             echo '<tr><td class="text-center">No Member Record!</td></tr>';
@@ -58,7 +48,7 @@ $row = mysqli_fetch_assoc($result);
                                         </tr>
                                         <tr>
                                             <th scope="row">Name</th>
-                                            <td><?php echo $row["patient_name"];?></td>
+                                            <td><?php echo $row["patient_firstname"].' '.$row["patient_lastname"];?></td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Identity</th>
@@ -96,71 +86,38 @@ $row = mysqli_fetch_assoc($result);
                                         } ?>
                                     </table>
                                 </div>
-                                <div class="tab-pane fade" id="nav-history" role="tabpanel" aria-labelledby="history-tab">
-                                    <table class="table table-striped table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col">Medication ID #</th>
-                                                <th scope="col">Description</th>
-                                                <th scope="col">Date Recorded</th>
-                                                <th scope="col">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <th scope="row">1</th>
-                                                <td>Mark</td>
-                                                <td>Otto</td>
-                                                <td>@mdo</td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">2</th>
-                                                <td>Jacob</td>
-                                                <td>Thornton</td>
-                                                <td>@fat</td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">3</th>
-                                                <td>Larry</td>
-                                                <td>the Bird</td>
-                                                <td>@twitter</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                
                                 <div class="tab-pane fade" id="nav-appointment" role="tabpanel" aria-labelledby="appointment-tab">
-                                    <div class="d-flex align-items-center">
-                                        <div class="ml-auto mt-2 mb-2">
-                                            <button class="btn btn-sm btn-primary"><i class="fa fa-pencil-alt mr-2"></i>Edit Appointment</button>
-                                            <button class="btn btn-sm btn-primary"><i class="fa fa-plus mr-2"></i>Add Appointment</button>
-                                        </div>
-                                    </div>
                                     <table class="table table-striped table-bordered">
                                         <thead>
                                             <tr>
-                                                <th scope="col">Medication ID #</th>
-                                                <th scope="col">Description</th>
-                                                <th scope="col">Date Recorded</th>
-                                                <th scope="col">Action</th>
+                                                <th scope="col">Date #</th>
+                                                <th scope="col">Time</th>
+                                                <th scope="col">Doctor Name</th>
+                                                <th scope="col">Treatment Type</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <th scope="row">1</th>
-                                                <td>Mark</td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">2</th>
-                                                <td>Jacob</td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">3</th>
-                                                <td>Larry</td>
-                                            </tr>
+                                            <?php
+                                            $result = mysqli_query($conn, "SELECT * FROM appointment JOIN doctors ON appointment.doctor_id = doctors.doctor_id WHERE patient_id = '".$pid."'");
+                                            while($row = mysqli_fetch_assoc($result)) {
+                                                if ($result->num_rows == 0) {
+                                                    echo '<p>No result</p>';
+                                                } else {
+                                                    ?>
+                                                    <tr>
+                                                        <td><?= $row["app_date"] ?></td>
+                                                        <td><?= $row["app_time"] ?></td>
+                                                        <td>Dr. <?= $row["doctor_firstname"].' '.$row["doctor_lastname"] ?></td>
+                                                        <td><?= $row["treatment_type"] ?></td>
+                                                    </tr>
+                                                    <?php
+                                                    }
+                                                }
+                                                    ?>
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="tab-pane fade" id="nav-message" role="tabpanel" aria-labelledby="message-tab">...</div>
                             </div>
                             <!-- End View -->
                         </div>
@@ -171,6 +128,6 @@ $row = mysqli_fetch_assoc($result);
         </div>
         <!-- End Page Content -->
     </div>
-    <?php include 'includes/footer.php';?>
+    <?php include JS_PATH;?>
 </body>
 </html>

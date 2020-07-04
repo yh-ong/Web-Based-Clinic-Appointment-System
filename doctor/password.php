@@ -7,17 +7,24 @@ $errors = array();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
-	$password = $doctor_row['doctor_password'];
+	$password = decrypt($doctor_row['doctor_password'], $token);
 	$old_password = escape_input($_POST['inputOldPassword']);
 	$new_password = escape_input($_POST['inputNewPassword']);
 	$con_password = escape_input($_POST['inputConfirmPassword']);
-
-	if (empty($old_password)) array_push($errors, "Password is required");
-	if (empty($new_password)) array_push($errors, "New Password is required");
-	if (empty($con_password)) array_push($errors, "Confirm Password is required");
-
-	if ($old_password != $password) array_push($errors, "Incorrect Password");
-	if ($new_password != $con_password) array_push($errors, "Password Not Match");
+	
+	if (empty($old_password)) {
+		array_push($errors, "Password is required");
+	} elseif (empty($new_password)) {
+		array_push($errors, "New Password is required");
+	} elseif (empty($con_password)) {
+		array_push($errors, "Confirm Password is required");
+	} elseif (md5($old_password) != $password) {
+		array_push($errors, "Incorrect Password");
+	} elseif (!empty($new_password)) {
+        password_validation($new_password);
+    } elseif ($new_password != $con_password) {
+        array_push($errors, "Password not Equal");
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -49,6 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 								<label for="inputNewPassword" class="col-sm-3 col-form-label text-right">New Password</label>
 								<div class="col-sm-6">
 									<input type="text" id="inputNewPassword" name="inputNewPassword" class="form-control form-control-sm" value="">
+									<small class="form-text text-muted" id="passwordHelp">Use 8 or more characters with a mix of letters, numbers & symbols</small>
 								</div>
 							</div>
 
@@ -79,8 +87,10 @@ if (isset($_POST['submitbtn']))
 {
 	if (count($errors) == 0)
 	{
+		$en_pass = encrypt(md5($new_password), $token);
+
 		$stmt = $conn->prepare("UPDATE doctors SET doctor_password = ? WHERE doctor_id = ?");
-		$stmt->bind_param("si", $password);
+		$stmt->bind_param("si", $en_pass, $doctor_row['doctor_id']);
 		if ($stmt->execute()) 
 		{
 			echo "<script>Swal.fire('Great','Password Updated!','success')</script>";

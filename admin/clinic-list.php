@@ -1,28 +1,27 @@
 <?php
-require_once("includes/dbconnection.php");
-
-include("includes/session.php");
-include("includes/config.php");
+require_once('../config/autoload.php');
+include('includes/path.inc.php');
+include('includes/session.inc.php');
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <?php include 'includes/styles.php';?>
+    <?php include CSS_PATH;?>
 </head>
 
 <body>
-    <?php include 'includes/navigate.php'; ?>
+    <?php include NAVIGATION; ?>
     <div class="page-content" id="content">
-        <?php include 'includes/header.php';?>
+        <?php include HEADER;?>
         <!-- Page content -->
         <div class="row">
             <div class="col-12">
                 <!-- Card Content -->
                 <div class="card">
                     <div class="card-body">
-                        <div class="d-flex mb-3">
+                        <!-- <div class="d-flex mb-3">
                             <h5 class="card-title mr-auto">Clinics List</h5>
-                        </div>
+                        </div> -->
                         <div class="card-inner">
                             <!-- Datatable -->
                             <div class="data-tables">
@@ -50,7 +49,7 @@ include("includes/config.php");
                                             <td><?php echo $table_row["clinic_contact"];?></td>
                                             <td><?php echo $table_row["date_created"];?></td>
                                             <td>
-                                                <?php if ($table_row["clinic_status"] == "Approved") {
+                                                <?php if ($table_row["clinic_status"] == "1") {
                                                     echo '<span class="badge badge-success">Approved</span>';
                                                 } else {
                                                     echo '<span class="badge badge-danger">Not Approve</span>';
@@ -59,7 +58,7 @@ include("includes/config.php");
                                             <td>
                                                 <a href="clinic-view.php?cid=<?php echo $encrypt_id;?>" class="btn btn-sm btn-primary"><i class="fa fa-eye"></i> View</a>
                                                 <a href="clinic-edit.php?cid=<?php echo $encrypt_id;?>" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i> Edit</a>
-                                                <a href="clinic-view.php" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i> Delete</a>
+                                                <!-- <a href="clinic-view.php" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i> Delete</a> -->
                                             </td>
                                         </tr>
                                         <?php } ?>
@@ -86,6 +85,6 @@ include("includes/config.php");
         <!-- End Page Content -->
     </div>
 
-    <?php include 'includes/footer.php';?>
+    <?php include JS_PATH;?>
 </body>
 </html>

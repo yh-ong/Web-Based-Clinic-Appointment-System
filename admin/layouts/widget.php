@@ -4,9 +4,9 @@
             <div class="card-body d-flex">
                 <div class="widget-left">
                     <div class="widget-titles">
-                        <h6>Total Patients</h6>
+                        <h6>Total Clinics</h6>
                     </div>
-                    <span class="widget-numbers">2,356</span>
+                    <span class="widget-numbers"><?= $clinic_count ?></span>
                 </div>
                 <div class="widget-icons bg-blue">
                     <div class="c-blue">
@@ -22,7 +22,6 @@
                         </svg>
                     </div>
                 </div>
-                <span class="widget-circle"></span>
             </div>
         </div>
     </div>
@@ -33,7 +32,7 @@
                     <div class="widget-titles">
                         <h6>Total Appointment</h6>
                     </div>
-                    <span class="widget-numbers">924</span>
+                    <span class="widget-numbers"><?= $appointment_count ?></span>
                 </div>
                 <div class="widget-icons bg-red">
                     <div class="c-red">
@@ -57,7 +56,7 @@
                     <div class="widget-titles">
                         <h6>Total Patients</h6>
                     </div>
-                    <span class="widget-numbers">2,356</span>
+                    <span class="widget-numbers"><?= $patient_count ?></span>
                 </div>
                 <div class="widget-icons bg-oren">
                     <div class="c-oren">

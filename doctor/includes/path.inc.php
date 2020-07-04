@@ -6,8 +6,8 @@ $PATH = "doclab/doctor";
 
 switch ($_SERVER["SCRIPT_NAME"]) {
     case '/'.$PATH.'/login.php':
-        $CURRENT_PAGE = "Login | Clinic UI";
-        $CURRENT_PATH = "Login | Clinic UI";
+        $CURRENT_PAGE = "Login";
+        $CURRENT_PATH = "Login";
         $PAGE_TITLE = "Login | $BRAND_NAME";
         break;
     
@@ -109,6 +109,24 @@ switch ($_SERVER["SCRIPT_NAME"]) {
         $CURRENT_PAGE = "Review";
         $CURRENT_PATH = "Review";
         $PAGE_TITLE = "Review | $BRAND_NAME";
+        break;
+    
+    case '/'.$PATH.'/password.php':
+        $CURRENT_PAGE = "Reset Password";
+        $CURRENT_PATH = "Reset Password";
+        $PAGE_TITLE = "Reset Password | $BRAND_NAME";
+        break;
+    
+    case '/'.$PATH.'/reset.php':
+        $CURRENT_PAGE = "Reset Password";
+        $CURRENT_PATH = "Reset Password";
+        $PAGE_TITLE = "Reset Password | $BRAND_NAME";
+        break;
+    
+    case '/'.$PATH.'/activate.php':
+        $CURRENT_PAGE = "Activate Doctor Account";
+        $CURRENT_PATH = "Activate Doctor Account";
+        $PAGE_TITLE = "Activate Doctor Account | $BRAND_NAME";
         break;
     
     // Index Page

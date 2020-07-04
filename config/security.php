@@ -1,5 +1,5 @@
 <?php
-function attempt_fail()
+/* function attempt_fail()
 {
 	global $conn;
 	$ip_add = $_SERVER["REMOTE_ADDR"];
@@ -16,7 +16,7 @@ function attempt_fail()
 	if ($count[0] > 3) {
 		echo "Your are allowed 3 attempts in 10 minutes";
 	}
-}
+} */
 
 function randomPassword()
 {
@@ -45,27 +45,38 @@ function randomToken()
 	return mt_rand(100000, 999999);
 }
 
-// $crypt_key = "oru-9(£20fjasdiofewfqwfh;klncsahei223gfpaoeighew";
-/* $crypt_key = "aNdRgUkXp2s5v8y/B?E(H+MbQeShVmYq";
-function encrypt_url($encrypt)
-{
-	global $crypt_key;
-
-	$iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB), MCRYPT_RAND);
-	$passcrypt = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $crypt_key, $encrypt, MCRYPT_MODE_ECB, $iv);
-	$encode = base64_encode($passcrypt);
-
-	return $encode;
+function generateCode($limit){
+	$code = '';
+	for($i = 0; $i < $limit; $i++) { $code .= mt_rand(0, 9); }
+	return $code;
 }
 
-//Decrypt Function
-function decrypt_url($decrypt)
-{
-	global $crypt_key;
+$ciphering = "AES-256-CBC";
+$iv_length = openssl_cipher_iv_length($ciphering); 
+$options = 0; 
 
-	$decoded = base64_decode($decrypt);
-	$iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB), MCRYPT_RAND);
-	$decrypted = mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $crypt_key, $decoded, MCRYPT_MODE_ECB, $iv);
+function encrypt($text, $token) {
+	global $ciphering, $iv_length, $options;
 
-	return str_replace("\\0", '', $decrypted);
-} */
+	$enfirst = substr($token, 0, 3);
+	$enlast = substr($token, -3);
+	$encryption_key = $enfirst.$enlast;
+
+	$iv = substr($token, 0, 19);
+	$encryption_iv = substr($iv,3);
+
+	return openssl_encrypt($text, $ciphering, $encryption_key, $options, $encryption_iv);
+}
+
+function decrypt($entext, $token) {
+	global $ciphering, $iv_length, $options;
+
+	$enfirst = substr($token, 0, 3);
+	$enlast = substr($token, -3);
+	$decryption_key = $enfirst.$enlast;
+
+	$iv = substr($token, 0, 19);
+	$decryption_iv = substr($iv,3);
+	
+	return openssl_decrypt ($entext, $ciphering, $decryption_key, $options, $decryption_iv);
+}

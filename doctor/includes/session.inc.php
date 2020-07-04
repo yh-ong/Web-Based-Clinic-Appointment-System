@@ -14,6 +14,8 @@ $stmt->execute();
 $doctor_result = $stmt->get_result();
 $doctor_row = $doctor_result->fetch_assoc();
 
+$token = $doctor_row["doctor_token"];
+
 $pt_row = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM appointment INNER JOIN patients ON appointment.patient_id = patients.patient_id WHERE doctor_id = '".$doctor_row['doctor_id']."' AND status = 1"));
 $app_row = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM appointment WHERE doctor_id = '".$doctor_row['doctor_id']."'"));
 $tr_row = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM treatment_type WHERE doctor_id = '".$doctor_row['doctor_id']."'"));

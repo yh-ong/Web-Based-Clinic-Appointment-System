@@ -11,7 +11,7 @@ $getdata = json_decode($contentdata);
 
 $id = $getdata->doctorID;
 
-$query = "SELECT * FROM doctors WHERE doctor_id = '$id' ";
+$query = "SELECT * FROM doctors INNER JOIN speciality ON speciality.speciality_id = doctors.doctor_speciality WHERE doctor_id = '$id' ";
 $result = mysqli_query($conn, $query);
 
 $numrow = mysqli_num_rows($result);

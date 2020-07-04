@@ -66,17 +66,17 @@ if (isset($_POST['forgotbtn']))
 	if (count($errors) == 0) 
 	{
 		$selector = bin2hex(random_bytes(8));
-		$token = random_bytes(32);
-		$link = $_SERVER["SERVER_NAME"] . "/doclab/doctor/reset.php?selector=".$selector."&validator=". bin2hex($token);
+		$validator = random_bytes(32);
+		$link = $_SERVER["SERVER_NAME"] . "/doclab/doctor/reset.php?selector=".$selector."&validator=". bin2hex($validator);
 		$expries = date("U") + 1800;
 
-		$userEmail = $_POST["email"];
+		$userEmail = $_POST["inputEmailAddress"];
 
 		$stmt = $conn->prepare("DELETE FROM doctor_reset WHERE reset_email = ?");
 		$stmt->bind_param("s", $userEmail);
 		$stmt->execute();
 
-		$hashedToken = password_hash($token, PASSWORD_DEFAULT);
+		$hashedToken = password_hash($validator, PASSWORD_DEFAULT);
 
 		$stmt = $conn->prepare("INSERT INTO doctor_reset (reset_email, reset_selector, reset_token, reset_expires) VALUE (?,?,?,?)");
 		$stmt->bind_param("ssss", $userEmail, $selector, $hashedToken, $expries);
@@ -84,17 +84,7 @@ if (isset($_POST['forgotbtn']))
 
 		$stmt->close();
 
-		$email = "1151201565@student.mmu.edu.my";
-		
-		$link = $_SERVER["SERVER_NAME"] . "/doclab/doctor/reset.php?id=" . $r['doctor_id'];
-		$token = randomToken();
-
-		$tokenstmt = $conn->prepare("UPDATE doctors SET doctor_token = ? WHERE doctor_id = ?");
-		$tokenstmt->bind_param("si", $token, $doctor_id);
-		$tokenstmt->execute();
-		$tokenstmt->close();
-
-		if (sendmail($email, $mail['fg_subject'], $mail['fg_title'], $mail['fg_content'], $mail['fg_button'], $link, $token)) {
+		if (sendmail($userEmail, $mail['fg_subject'], $mail['fg_title'], $mail['fg_content'], $mail['fg_button'], $link, "")) {
 			echo "<script>Swal.fire('Great !','Your Password Has Been Sent to Your Email','success')</script>";
 		} else {
 			echo "<script>Swal.fire('Oops...','Failed to Recover Your Password! Try Again!','error')</script>";

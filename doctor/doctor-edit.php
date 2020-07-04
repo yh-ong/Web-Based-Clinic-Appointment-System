@@ -4,8 +4,8 @@ include('./includes/path.inc.php');
 include('./includes/session.inc.php');
 include(SELECT_HELPER);
 
-$errFName = $errLName = $errSpec = $errYears = $errSpoke = $errGender = $errEmail = $errContact =  "";
-$classFName = $classLName = $classSpec = $classYears = $classSpoke = $classGender = $classEmail = $errContact = "";
+$errFName = $errLName = $errSpec = $errYears = $errFee = $errSpoke = $errGender = $errEmail = $errContact =  "";
+$classFName = $classLName = $classSpec = $classYears = $classFee = $classSpoke = $classGender = $classEmail = $errContact = "";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	// $avatar = $conn->real_escape_string($_POST['inputAvatar']);
@@ -27,6 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$speciality = escape_input($_POST['inputSpeciality']);
 	}
 	$years = escape_input($_POST['inputYrsExp']);
+	$fees = escape_input($_POST['inputFee']);
 	$desc = escape_input($_POST['inputDesc']);
 	if (isset($_POST['inputLanguages'])) {
 		$lang = $_POST['inputLanguages'];
@@ -74,6 +75,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			$classYears = $error_html['errClass'];
 		}
 	}
+
+	if (empty($fees)) {
+		$errFee = $error_html['errFee'];
+        $classFee = $error_html['errClass'];
+    } else {
+        if (!filter_var($fees, FILTER_VALIDATE_INT)) {
+            $errFee = $error_html['invalidInt'];
+            $classFee = $error_html['errClass'];
+        }
+    }
 
 	if (empty($lang)) {
 		$errSpoke = $error_html['errSpoke'];
@@ -177,12 +188,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 											<?php
 											$table_result = mysqli_query($conn, "SELECT * FROM speciality");
 											while ($table_row = mysqli_fetch_assoc($table_result)) {
-												if ($doctor_row["doctor_speciality"] == $table_row['speciality_name']) {
+												if ($doctor_row["doctor_speciality"] == $table_row['speciality_id']) {
 													$selected = "selected";
 												} else {
 													$selected = "";
 												}
-												echo '<option value="' . $table_row["speciality_name"] . '" ' . $selected . '>' . $table_row["speciality_name"] . '</option>' . PHP_EOL;
+												echo '<option value="' . $table_row["speciality_id"] . '" ' . $selected . '>' . $table_row["speciality_name"] . '</option>' . PHP_EOL;
 											}
 											?>
 										</select>
@@ -193,6 +204,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 										<input type="number" name="inputYrsExp" class="form-control <?= $classYears ?>" id="inputYrsExp" placeholder="Enter Years Experience" value="<?php echo $doctor_row["doctor_experience"]; ?>">
 										<?= $errYears ?>
 									</div>
+									<div class="form-group col-md-6">
+                                        <label for="inputFee">Consultant Fees</label>
+                                        <input type="text" name="inputFee" class="form-control <?= $classFee ?>" id="inputFee" placeholder="Enter Consultant Fees" value="<?= $doctor_row["consult_fee"]; ?>">
+                                        <?= $errFee ?>
+                                    </div>
 								</div>
 								<!-- End Add Doctor -->
 							</div>
@@ -211,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 									<div class="file-tab">
 										<label class="btn btn-sm btn-primary btn-block btn-file">
 											<span>Browse</span>
-											<input type="file" name="inputAvatar" id="inputAvatar" accept="image/*" onchange="openFile(event)">
+											<input type="file" name="inputAvatar" id="inputAvatar" accept="image/*" onchange="openFile(event)" value="<?= $doctor_row["doctor_avatar"]; ?>">
 										</label><!-- <button type="button" class="btn btn-sm btn-primary">Remove</button> -->
 									</div>
 								</div>
@@ -337,44 +353,50 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </html>
 <?php
 if (isset($_POST["savebtn"])) {
-	if (multi_empty($errFName, $errLName, $errSpec, $errYears, $errSpoke, $errGender, $errEmail, $errContact)) {
-		if (isset($_FILES["inputAvatar"]["name"])) {
-			$allowed =  array('gif', 'png', 'jpg');
-			$filename = $_FILES['inputAvatar']['name'];
-			$ext = pathinfo($filename, PATHINFO_EXTENSION);
+	if (multi_empty($errFName, $errLName, $errSpec, $errYears, $errFee, $errSpoke, $errGender, $errEmail, $errContact)) {
 
-			if (!in_array($ext, $allowed)) {
-				echo "<script>Swal.fire('Oops...','Only can be image!','error')</script>";
-				exit();
-			} else {
-				if (!empty($_FILES['inputAvatar']['name'])) {
-					$folderpath = "../uploads/" . $clinic_row['clinic_id'] . "/doctor" . "/";
-					$path = "../uploads/" . $clinic_row['clinic_id'] . "/doctor" . "/" . $_FILES['inputAvatar']['name'];
-					$image = $_FILES['inputAvatar']['name'];
-
-					if (!file_exits($folderpath)) {
-						mkdir($folderpath, 0777, true);
-					}
-					move_uploaded_file($_FILES['inputAvatar']['tmp_name'], $path);
-				} else {
-					echo "<script>Swal.fire('Oops...','You should select a file to upload!','error')</script>";
+		if ($_FILES["inputAvatar"]["name"] != "") {
+			if (isset($_FILES["inputAvatar"]["name"])) {
+				$allowed =  array('gif', 'png', 'jpg');
+				$filename = $_FILES['inputAvatar']['name'];
+				$ext = pathinfo($filename, PATHINFO_EXTENSION);
+	
+				if (!in_array($ext, $allowed)) {
+					echo "<script>Swal.fire('Oops...','Only can be image!','error')</script>";
 					exit();
+				} else {
+					if (!empty($_FILES['inputAvatar']['name'])) {
+						$folderpath = "../uploads/" . $doctor_row['clinic_id'] . "/doctor" . "/";
+						$path = "../uploads/" . $doctor_row['clinic_id'] . "/doctor" . "/" . $_FILES['inputAvatar']['name'];
+						$image = $_FILES['inputAvatar']['name'];
+	
+						if (!file_exists($folderpath)) {
+							mkdir($folderpath, 0777, true);
+						}
+						move_uploaded_file($_FILES['inputAvatar']['tmp_name'], $path);
+					} else {
+						echo "<script>Swal.fire('Oops...','You should select a file to upload!','error')</script>";
+						exit();
+					}
 				}
 			}
+			$updatestmt = $conn->prepare("UPDATE doctors SET doctor_avatar = ?, doctor_firstname = ?, doctor_lastname = ?, doctor_speciality = ?, doctor_experience = ?, consult_fee = ?, doctor_desc = ?, doctor_spoke = ?, doctor_gender = ?, doctor_dob = ?, doctor_email = ?, doctor_contact = ? WHERE doctor_id = ? ");
+			$updatestmt->bind_param("ssssisssssssi", $image, $fname, $lname, $speciality, $years, $fees, $desc, $spoke, $gender, $dob, $email, $contact, $doctor_row['doctor_id']);
+		} else {
+			$updatestmt = $conn->prepare("UPDATE doctors SET doctor_firstname = ?, doctor_lastname = ?, doctor_speciality = ?, doctor_experience = ?, consult_fee = ?, doctor_desc = ?, doctor_spoke = ?, doctor_gender = ?, doctor_dob = ?, doctor_email = ?, doctor_contact = ? WHERE doctor_id = ? ");
+			$updatestmt->bind_param("sssisssssssi", $fname, $lname, $speciality, $years, $fees, $desc, $spoke, $gender, $dob, $email, $contact, $doctor_row['doctor_id']);
 		}
 
-		$query = "UPDATE doctors SET doctor_avatar = ?, doctor_firstname = ?, doctor_lastname = ?, doctor_speciality = ?, doctor_experience = ?, doctor_desc = ?, doctor_spoke = ?, doctor_gender = ?, doctor_dob = ?, doctor_email = ?, doctor_contact = ? WHERE doctor_id = ? ";
-		$stmt->bind_param("ssssissssssssi", $image, $fname, $lname, $speciality, $years, $desc, $spoke, $gender, $dob, $email, $contact, $date_created, $clinic_row['clinic_id']);
-		if ($stmt->execute()) {
+		if ($updatestmt->execute()) {
 			echo '<script>
-				Swal.fire({ title: "Great!", text: "New Record Added!", type: "success" }).then((result) => {
+				Swal.fire({ title: "Great!", text: "Successful Updated!", type: "success" }).then((result) => {
 					if (result.value) { window.location.href = "doctor-edit.php"; }
 				});
 			</script>';
 		} else {
 			echo "Error: " . $query . "<br>" . mysqli_error($conn);
 		}
-		$stmt->close();
+		$updatestmt->close();
 	}
 }
 ?>

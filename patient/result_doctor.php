@@ -4,7 +4,7 @@ header("Content-Type: application/json; charset=UTF-8");
 
 include("../config/database.php");
 
-$query = "SELECT * FROM doctors ";
+$query = "SELECT * FROM doctors INNER JOIN speciality ON doctors.doctor_speciality = speciality.speciality_id";
 
 $result = mysqli_query($conn, $query);
 

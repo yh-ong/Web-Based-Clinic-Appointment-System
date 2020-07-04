@@ -34,9 +34,9 @@ include('./includes/session.inc.php');
 		<?php include HEADER; ?>
 		<!-- Page content -->
 		<div class="row">
-			<div class="col-md-8">
+			<div class="col-md-7">
 				<?php
-				function time_elapsed_string($datetime, $full = false)
+				function time_elapsed($datetime, $full = false)
 				{
 					$now = new DateTime;
 					$ago = new DateTime($datetime);
@@ -94,7 +94,7 @@ include('./includes/session.inc.php');
 										<img src="../assets/img/empty/empty-avatar.jpg" class="rounded mr-3" width="30px">
 										<span><?= $table_row["patient_firstname"].' '.$table_row["patient_lastname"] ?></span>
 									</div>
-									<small><b>Submitted</b> <?= time_elapsed_string($table_row['date']) ?></small>
+									<small><b>Submitted</b> <?= time_elapsed($table_row['date']) ?></small>
 								</div>
 							</div>
 							<div class="card-body">
@@ -117,7 +117,7 @@ include('./includes/session.inc.php');
 				}
 				?>
 			</div>
-			<div class="col-md-4">
+			<div class="col-md-5">
 				<div class="card">
 					<div class="card-body">
 						<div class="rate-wrap">

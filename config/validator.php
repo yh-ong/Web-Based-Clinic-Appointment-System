@@ -6,7 +6,7 @@ $regrex = array(
 	'username' => "^[\w]{3,32}\$",
 	'amount' => "^[-]?[0-9]+\$",
 	'phone' => "^[0-9]{10,11}\$",
-	'contact' => "/^[1-9][0-9]{0,15}$/",
+	'contact' => "/^[0-9]{11}$/",
 	'number' => "^[-]?[0-9,]+\$",
 	'num' => "/^[1-9][0-9]*$/",
 	'2digitforce' => "^\d+\,\d\d\$",
@@ -20,6 +20,7 @@ $regrex = array(
 );
 
 $error_html = array(
+	'errName' => '<div class="invalid-feedback">Name is required.</div>',
 	'errFirstName' => '<div class="invalid-feedback">First Name is required.</div>',
 	'errLastName' => '<div class="invalid-feedback">Last Name is required.</div>',
 	'errSpec' => '<div class="invalid-feedback">Speciality is required.</div>',
@@ -30,6 +31,7 @@ $error_html = array(
 	'errSpoke' => '<div class="invalid-feedback">Spoken Languages is required.</div>',
 	'errEmail' => '<div class="invalid-feedback">Email Address is required.</div>',
 	'errContact' => '<div class="invalid-feedback">Contact Number is required.</div>',
+	'errURL' => '<div class="invalid-feedback">URL is required.</div>',
 	'errNationality' => '<div class="invalid-feedback">Nationality is required.</div>',
 	'errIdentityNumber' => '<div class="invalid-feedback">Identity Number is required.</div>',
 	'errMaritalStatus' => '<div class="invalid-feedback">Marital Status is required.</div>',
@@ -37,10 +39,14 @@ $error_html = array(
 	'errCity' => '<div class="invalid-feedback">City is required.</div>',
 	'errState' => '<div class="invalid-feedback">State is required.</div>',
 	'errZipcode' => '<div class="invalid-feedback">Zipcode is required.</div>',
+	'errFee' => '<div class="invalid-feedback">Fees is required.</div>',
 
+	'errField' => '<div class="invalid-feedback">This Field is Required.</div>',
 	'invalidEmail' => '<div class="invalid-feedback">Invalid Email Format</div>',
+	'invalidURL' => '<div class="invalid-feedback">Invalid URL Format. Please include http:// || https://</div>',
 	'invalidInt' => '<div class="invalid-feedback">Only Number Allowed</div>',
 	'invalidText' => '<div class="invalid-feedback">Only letters and white space allowed</div>',
+	'invalidContact' => '<div class="invalid-feedback">Invalid Phone Number (max: 11 number)</div>',
 
 	'errClass' => 'is-invalid'
 );
@@ -115,5 +121,21 @@ function website_validation($website)
 	global $errors;
 	if (!preg_match("/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i", $website)) {
 		array_push($errors, "Invalid URL");
+	}
+}
+
+function password_validation($password)
+{
+	global $errors;
+	if (strlen($password) < 8) {
+		array_push($errors, "Password Must Contain At Least 8 Characters");
+	} elseif (!preg_match("/[0-9]+/", $password)) {
+		array_push($errors, "Your Password Must Contain At Least 1 Number");
+	} elseif (!preg_match("/[A-Z]+/", $password)) {
+		array_push($errors, "Your Password Must Contain At Least 1 Capital Letter");
+	} elseif (!preg_match("/[a-z]+/", $password)) {
+		array_push($errors, "Your Password Must Contain At Least 1 Lowercase Letter");
+	} elseif (!preg_match("/\W/", $password)) {
+		array_push($errors, "Password Must Contain At Least 1 Special Character");
 	}
 }
