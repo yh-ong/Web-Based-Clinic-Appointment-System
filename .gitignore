@@ -30,7 +30,8 @@ speed-measure-plugin*.json
 .history/*
 
 # Project
-uploads/
+uploads/*
+!uploads/icons
 
 # System Files
 .DS_Store
