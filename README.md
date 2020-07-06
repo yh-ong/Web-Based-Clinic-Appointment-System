@@ -13,21 +13,30 @@ In this project, contains 4 user-roles. Each users key features and functionalit
 #### Admin
 - approve the clinic status for new registration
 - view clinic/doctor/patient list
+- add/edit/delete speciality
 
 #### Doctor
-- add prescription/ in the database
+- edit doctor information & password reset
+- add sympton/diagnosis/advice in the database
 - view & add follow up the appointments
+- manage the available schedule
+- add/edit/delete treatment type
 
 #### Clinic
 - add/edit/delete doctor
+- add/edit clinic information
+- add/edit clinic manager & password reset
 - view appointment status & list
+- make annoucement for patient
 
 #### Patient (*Android-Based)
 - register as an patient account
+- edit profile & password reset
 - book & cancel an appointment
 - view booking status
 - view doctor availability
 - search clinic & doctor with filter
+- rate and review
 
 **Notes** : *for patient, no web based support only available at Android Based*
 
