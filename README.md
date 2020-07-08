@@ -1,5 +1,7 @@
 # Web-Based Clinic Appointment System
 
+**Notes** : *for patient, no web based support only available at mobile based. Please checkout [here - Mobile-Based Clinic Appointment System](https://github.com/yh-ong/Mobile-Based-Clinic-Appointment-System)*
+
 [TOC]
 
 ClinicME will involve two platforms which are mobile application and web based. For the mobile application based will use Ionic framework developed to let patient to book an appointment by anywhere in anytime. In web based, the system will use HTML, CSS, Javascript, PHP and MySQL developed to let clinic administrator and doctor to manage the appointment and update the clinic and doctor information.
@@ -29,7 +31,7 @@ In this project, contains 4 user-roles. Each users key features and functionalit
 - view appointment status & list
 - make annoucement for patient
 
-#### Patient (*Android-Based)
+#### Patient (Android-Based)
 - register as an patient account
 - edit profile & password reset
 - book & cancel an appointment
@@ -38,7 +40,7 @@ In this project, contains 4 user-roles. Each users key features and functionalit
 - search clinic & doctor with filter
 - rate and review
 
-**Notes** : *for patient, no web based support only available at Android Based*
+**Notes** : *for patient, no web based support only available at mobile based. Please checkout [here - Mobile-Based Clinic Appointment System](https://github.com/yh-ong/Mobile-Based-Clinic-Appointment-System)*
 
 ## Technology
 Clinic ME uses a number of technology to work properly:
